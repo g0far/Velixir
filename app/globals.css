@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 0, 0, 0;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  overflow-x: hidden;
+}
+
+.Welcome-box {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+}
+
+.Welcome-text {
+  background: linear-gradient(to right, #b49bff, #9f78ff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.button-primary {
+  background: linear-gradient(
+    180deg,
+    rgba(112, 66, 248, 0.38) 0%,
+    rgba(112, 66, 248, 0.19) 100%
+  );
+  border: 1px solid rgba(112, 66, 248, 0.38);
+  transition: all 0.3s ease;
+}
+
+.button-primary:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(112, 66, 248, 0.6) 0%,
+    rgba(112, 66, 248, 0.3) 100%
+  );
+  box-shadow: 0 0 20px rgba(112, 66, 248, 0.4);
+}
+
+.cursive {
+  font-style: italic;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d0d0d;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #7042f8;
+  border-radius: 50px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9f78ff;
+}
+
+/* Disable number input spin buttons */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+@keyframes pulse-purple {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(147, 51, 234, 0.5), inset 0 0 4px rgba(147, 51, 234, 0.3);
+    border-color: rgba(147, 51, 234, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(168, 85, 247, 0.9), inset 0 0 10px rgba(168, 85, 247, 0.5);
+    border-color: rgba(168, 85, 247, 0.9);
+  }
+}
+
+.animate-pulse-purple {
+  animation: pulse-purple 2s infinite ease-in-out;
+}
+
+/* Hide Next.js dev server overlay indicators completely in development */
+nextjs-portal,
+#nextjs-portal-root,
+nextjs-portal-root {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+

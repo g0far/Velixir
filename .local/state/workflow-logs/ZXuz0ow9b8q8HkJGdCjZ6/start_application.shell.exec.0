@@ -1,0 +1,52 @@
+
+> portfolio@0.1.0 dev
+> next dev -p 5000
+
+[1G[0K  [1m[38;2;173;127;168m ▲ Next.js 14.0.3[39m[22m
+   - Local:        http://localhost:5000
+
+[35m[1mAttention[22m[39m: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+[36mhttps://nextjs.org/telemetry[39m
+
+ [37m[1m [22m[39m Downloading swc package @next/swc-linux-x64-gnu...
+ [37m[1m [22m[39m Downloading swc package @next/swc-linux-x64-musl...
+ZlibError: zlib: unexpected end of file
+    at Unzip.write [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:29783[90m)[39m
+    at Unzip.flush [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:29247[90m)[39m
+    at Unzip.end [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:29325[90m)[39m
+    at Unpack.end [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:62061[90m)[39m
+    at Yallist.<anonymous> [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:12910[90m)[39m
+    at Yallist.forEach [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:94128[90m)[39m
+    at ReadStream.emit [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:12835[90m)[39m
+    at ReadStream.emit [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:4696[90m)[39m
+    at [maybeEmitEnd] [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:12372[90m)[39m
+    at ReadStream.emit [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:13177[90m)[39m {
+  code: [32m'Z_BUF_ERROR'[39m,
+  errno: [33m-5[39m,
+  recoverable: [33mfalse[39m,
+  file: [32m'/home/runner/workspace/.cache/next-swc/swc-linux-x64-musl-14.0.3.tgz'[39m,
+  cwd: [32m'/home/runner/workspace/node_modules/next/next-swc-fallback/@next/swc-linux-x64-musl'[39m,
+  tarCode: [32m'TAR_ABORT'[39m
+}
+ZlibError: zlib: unexpected end of file
+    at Unzip.write [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:29783[90m)[39m
+    at Unzip.flush [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:29247[90m)[39m
+    at Unzip.end [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:29325[90m)[39m
+    at Unpack.end [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:62061[90m)[39m
+    at Yallist.<anonymous> [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:12910[90m)[39m
+    at Yallist.forEach [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:94128[90m)[39m
+    at ReadStream.emit [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:12835[90m)[39m
+    at ReadStream.emit [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:4696[90m)[39m
+    at [maybeEmitEnd] [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:12372[90m)[39m
+    at ReadStream.emit [90m(/home/runner/workspace/[39mnode_modules/[4mnext[24m/dist/compiled/tar/index.js:1:13177[90m)[39m {
+  code: [32m'Z_BUF_ERROR'[39m,
+  errno: [33m-5[39m,
+  recoverable: [33mfalse[39m,
+  file: [32m'/home/runner/workspace/.cache/next-swc/swc-linux-x64-musl-14.0.3.tgz'[39m,
+  cwd: [32m'/home/runner/workspace/node_modules/next/next-swc-fallback/@next/swc-linux-x64-musl'[39m,
+  tarCode: [32m'TAR_ABORT'[39m
+}
+[?25h
+[1G[0K⠙[1G[0K

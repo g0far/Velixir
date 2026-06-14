@@ -1,0 +1,471 @@
+
+> portfolio@0.1.0 dev
+> next dev -p 5000
+
+[1G[0K  [1m[38;2;173;127;168m ▲ Next.js 14.0.3[39m[22m
+   - Local:        http://localhost:5000
+
+ [32m[1m✓[22m[39m Ready in 1353ms
+ [37m[1m○[22m[39m Compiling / ...
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+ [33m[1m⚠[22m[39m ./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
+
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+Attempted import error: 'webgl-sdf-generator' does not contain a default export (imported as 'createSDFGenerator').
+
+Import trace for requested module:
+./node_modules/troika-three-text/dist/troika-three-text.esm.js
+./node_modules/@react-three/drei/core/Text.js
+./node_modules/@react-three/drei/index.js
+./components/main/StarBackground.tsx
