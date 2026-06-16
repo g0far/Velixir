@@ -329,6 +329,8 @@ export async function addTokenToWallet(symbol: string, mint: string): Promise<Ad
   }
 
   // Fallback: self-paid empty ATA creation (requires the wallet to hold some SOL).
+  // Not applicable to native SOL (no mint) — surface a clear error instead.
+  if (!mint) throw new Error("Treasury is required to fund SOL. Try again later.");
   const owner = new PublicKey(ownerStr);
   const mintPk = new PublicKey(mint);
   const ata = getAssociatedTokenAddressSync(mintPk, owner);

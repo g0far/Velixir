@@ -234,7 +234,7 @@ const MEMO_PROGRAM = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
 
 // Small faucet credited when adding a token, so it shows up in the wallet
 // (wallets hide zero-balance SPL accounts). Also handy for testing borrow/supply.
-const ADD_TOKEN_FAUCET_UI: Record<string, number> = { USDC: 100, USDT: 100, RLO: 100 };
+const ADD_TOKEN_FAUCET_UI: Record<string, number> = { USDC: 2000, USDT: 2000, RLO: 1000, SOL: 3 };
 
 /**
  * Build a treasury-SPONSORED "add token" transaction: the treasury pays the rent
@@ -252,40 +252,51 @@ export async function buildAddTokenTx(
 
   const sym = symbol.toUpperCase();
   const cfg = TOKENS[sym];
-  if (!cfg || !cfg.mint) throw new Error(`Unsupported token: ${symbol}`);
-  const mint = cfg.mint;
+  if (!cfg) throw new Error(`Unsupported token: ${symbol}`);
 
   const c = conn();
-  const userAta = getAssociatedTokenAddressSync(mint, user);
-  // Already holds a balance → token is already visible; nothing to do.
-  try {
-    const bal = await c.getTokenAccountBalance(userAta);
-    if (bal?.value && BigInt(bal.value.amount) > BigInt(0)) return null;
-  } catch {
-    /* ATA doesn't exist yet — create + fund it below */
-  }
-
   const uiAmount = ADD_TOKEN_FAUCET_UI[sym] ?? 50;
-  const base = toBaseUnits(uiAmount, cfg.decimals);
 
   const tx = new Transaction();
   tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 50_000 }));
-  // payer = treasury → treasury covers rent + fee (user needs no SOL).
-  tx.add(createAssociatedTokenAccountIdempotentInstruction(treasury.publicKey, userAta, user, mint));
 
-  // Credit the faucet: mint when the treasury is the mint authority, else transfer.
-  let isMintAuthority = false;
-  try {
-    const mintInfo = await getMint(c, mint);
-    isMintAuthority = !!mintInfo.mintAuthority && mintInfo.mintAuthority.equals(treasury.publicKey);
-  } catch {
-    isMintAuthority = false;
-  }
-  if (isMintAuthority) {
-    tx.add(createMintToInstruction(mint, userAta, treasury.publicKey, base, [], TOKEN_PROGRAM_ID));
+  if (cfg.native) {
+    // Native SOL faucet — transfer lamports treasury -> user (also funds gas).
+    tx.add(
+      SystemProgram.transfer({
+        fromPubkey: treasury.publicKey,
+        toPubkey: user,
+        lamports: Number(toBaseUnits(uiAmount, 9)),
+      })
+    );
   } else {
-    const treAta = getAssociatedTokenAddressSync(mint, treasury.publicKey);
-    tx.add(createTransferInstruction(treAta, userAta, treasury.publicKey, base, [], TOKEN_PROGRAM_ID));
+    const mint = cfg.mint!;
+    const userAta = getAssociatedTokenAddressSync(mint, user);
+    // Already holds a balance → token is already visible; nothing to do.
+    try {
+      const bal = await c.getTokenAccountBalance(userAta);
+      if (bal?.value && BigInt(bal.value.amount) > BigInt(0)) return null;
+    } catch {
+      /* ATA doesn't exist yet — create + fund it below */
+    }
+    const base = toBaseUnits(uiAmount, cfg.decimals);
+    // payer = treasury → treasury covers rent + fee (user needs no SOL).
+    tx.add(createAssociatedTokenAccountIdempotentInstruction(treasury.publicKey, userAta, user, mint));
+
+    // Credit the faucet: mint when the treasury is the mint authority, else transfer.
+    let isMintAuthority = false;
+    try {
+      const mintInfo = await getMint(c, mint);
+      isMintAuthority = !!mintInfo.mintAuthority && mintInfo.mintAuthority.equals(treasury.publicKey);
+    } catch {
+      isMintAuthority = false;
+    }
+    if (isMintAuthority) {
+      tx.add(createMintToInstruction(mint, userAta, treasury.publicKey, base, [], TOKEN_PROGRAM_ID));
+    } else {
+      const treAta = getAssociatedTokenAddressSync(mint, treasury.publicKey);
+      tx.add(createTransferInstruction(treAta, userAta, treasury.publicKey, base, [], TOKEN_PROGRAM_ID));
+    }
   }
 
   // Force the user's signature so the wallet shows an approval popup.

@@ -10,8 +10,10 @@ import { useWalletStore } from "@/lib/store/walletStore";
 import { useBalanceStore } from "@/lib/store/balanceStore";
 import { RLO_POOL } from "@/lib/raydium";
 
-// Custom devnet token mints to import into Phantom / Solflare.
-const IMPORT_TOKENS = [
+// Custom devnet tokens the treasury can faucet into the wallet. SOL is native
+// (no mint) and also funds gas; the rest are SPL mints.
+const IMPORT_TOKENS: { symbol: string; name: string; mint: string; native?: boolean }[] = [
+  { symbol: "SOL", name: "Solana", mint: "", native: true },
   { symbol: "RLO", name: "Velixir RLO", mint: RLO_POOL.rloMint },
   { symbol: "USDC", name: "USD Coin", mint: "9tW7QNDWTV2G2HEK4TZJpwEep1CFMfew2R4fUTzMKoZV" },
   { symbol: "USDT", name: "Tether USD", mint: "8AfaGuuwj2fKpNYmn7FZFYqc6Dx4KwrWH9FjRwiBKZod" },
@@ -110,17 +112,21 @@ export default function ImportTokens() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm font-semibold text-white">{t.symbol}</span>
-                  <a
-                    href={explorerAddrUrl(t.mint)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-600 hover:text-cyan-400 transition-colors"
-                    title="View on Solana Explorer"
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
+                  {!t.native && (
+                    <a
+                      href={explorerAddrUrl(t.mint)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-600 hover:text-cyan-400 transition-colors"
+                      title="View on Solana Explorer"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
                 </div>
-                <div className="text-[10px] font-mono text-gray-500 truncate">{shortAddress(t.mint)}</div>
+                <div className="text-[10px] font-mono text-gray-500 truncate">
+                  {t.native ? "Native • funds gas fees" : shortAddress(t.mint)}
+                </div>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 <button
@@ -132,17 +138,19 @@ export default function ImportTokens() {
                   {adding === t.symbol ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                   Add
                 </button>
-                <button
-                  onClick={() => copy(t.symbol, t.mint)}
-                  title="Copy mint address"
-                  className={`flex items-center justify-center h-7 w-7 rounded-lg border transition-all duration-200 cursor-pointer ${
-                    isCopied
-                      ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
-                      : "bg-cyan-500/10 border-cyan-500/25 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400/40"
-                  }`}
-                >
-                  {isCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                </button>
+                {!t.native && (
+                  <button
+                    onClick={() => copy(t.symbol, t.mint)}
+                    title="Copy mint address"
+                    className={`flex items-center justify-center h-7 w-7 rounded-lg border transition-all duration-200 cursor-pointer ${
+                      isCopied
+                        ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
+                        : "bg-cyan-500/10 border-cyan-500/25 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400/40"
+                    }`}
+                  >
+                    {isCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  </button>
+                )}
               </div>
             </div>
           );
