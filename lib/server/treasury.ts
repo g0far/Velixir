@@ -218,7 +218,12 @@ export async function buildSettlementTx(
   const { blockhash } = await c.getLatestBlockhash("confirmed");
   tx.recentBlockhash = blockhash;
   tx.feePayer = user;
-  tx.partialSign(treasury);
+  // The treasury only needs to sign when it actually moves funds out (a treasury
+  // -> user "out" leg). For deposit-only flows (supply / repay = user -> treasury)
+  // the user is the sole signer, so signing as treasury would throw "unknown
+  // signer". Only co-sign when the treasury is a required signer.
+  const treasuryMustSign = legs.some((l) => l.direction === "out" && (l.amount ?? 0) > 0);
+  if (treasuryMustSign) tx.partialSign(treasury);
 
   const serialized = tx.serialize({ requireAllSignatures: false, verifySignatures: false });
   return { b64: serialized.toString("base64"), treasury: treasury.publicKey.toBase58() };

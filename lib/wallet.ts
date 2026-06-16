@@ -15,6 +15,10 @@ import {
   LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
 import {
+  getAssociatedTokenAddressSync,
+  createAssociatedTokenAccountIdempotentInstruction,
+} from "@solana/spl-token";
+import {
   getConnection,
   MEMO_PROGRAM_ID,
   explorerTxUrl,
@@ -267,6 +271,44 @@ export async function sendActionTx({ action, symbol, toSymbol, amount, from }: T
     return signature;
   }
   throw new Error("Wallet cannot sign transactions.");
+}
+
+/**
+ * Add an SPL token to the connected wallet by creating its Associated Token
+ * Account. Solana wallets have no "watch asset" RPC, so this signs a real (tiny)
+ * transaction — the wallet shows an approval popup, and once the ATA exists the
+ * token shows up in Phantom/Solflare/MetaMask. Idempotent if the ATA exists.
+ * Returns the tx signature, or null when the account already existed.
+ */
+export async function addTokenToWallet(mint: string): Promise<string | null> {
+  const provider = getProvider();
+  if (!provider?.signTransaction) throw new Error("Connect a Solana wallet first.");
+  const ownerStr = provider.publicKey?.toString();
+  if (!ownerStr) throw new Error("Connect a Solana wallet first.");
+  const owner = new PublicKey(ownerStr);
+  const mintPk = new PublicKey(mint);
+  const conn = getConnection();
+  const ata = getAssociatedTokenAddressSync(mintPk, owner);
+
+  // Already registered → nothing to sign; the token is already in the wallet.
+  const existing = await conn.getAccountInfo(ata);
+  if (existing) return null;
+
+  const tx = new Transaction().add(
+    createAssociatedTokenAccountIdempotentInstruction(owner, ata, owner, mintPk)
+  );
+  const { blockhash } = await conn.getLatestBlockhash("confirmed");
+  tx.recentBlockhash = blockhash;
+  tx.feePayer = owner;
+
+  const signed = await provider.signTransaction(tx);
+  const sig = await conn.sendRawTransaction(signed.serialize(), {
+    skipPreflight: false,
+    preflightCommitment: "confirmed",
+    maxRetries: 5,
+  });
+  await waitForReceipt(sig);
+  return sig;
 }
 
 /** Poll the devnet for confirmation so the UI can flip pending → confirmed. */

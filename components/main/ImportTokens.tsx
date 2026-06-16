@@ -2,10 +2,12 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Copy, Check, Wallet, ExternalLink } from "lucide-react";
+import { Copy, Check, Wallet, ExternalLink, Plus, Loader2 } from "lucide-react";
 import { TokenLogo } from "@/lib/store/assetMetadata";
 import { toast } from "@/lib/store/toastStore";
-import { explorerAddrUrl, shortAddress } from "@/lib/wallet";
+import { explorerAddrUrl, shortAddress, addTokenToWallet, explorerTxUrl } from "@/lib/wallet";
+import { useWalletStore } from "@/lib/store/walletStore";
+import { useBalanceStore } from "@/lib/store/balanceStore";
 import { RLO_POOL } from "@/lib/raydium";
 
 // Custom devnet token mints to import into Phantom / Solflare.
@@ -22,6 +24,12 @@ const IMPORT_TOKENS = [
  */
 export default function ImportTokens() {
   const [copied, setCopied] = useState<string | null>(null);
+  const [adding, setAdding] = useState<string | null>(null);
+
+  const connected = useWalletStore((s) => s.connected);
+  const isSimulated = useWalletStore((s) => s.isSimulated);
+  const setModalOpen = useWalletStore((s) => s.setModalOpen);
+  const refreshBalancesSoon = useBalanceStore((s) => s.refreshSoon);
 
   const copy = async (symbol: string, mint: string) => {
     try {
@@ -32,6 +40,38 @@ export default function ImportTokens() {
     setCopied(symbol);
     toast.success(`${symbol} mint copied`, "Paste it in Phantom / Solflare → Manage Token List to add it.");
     setTimeout(() => setCopied((c) => (c === symbol ? null : c)), 1800);
+  };
+
+  // Trigger the wallet's approval popup and register the token (creates its ATA),
+  // so it shows up directly in the connected extension.
+  const addToWallet = async (symbol: string, mint: string) => {
+    if (!connected) {
+      toast.error("Wallet not connected", "Connect Phantom / Solflare / MetaMask first.");
+      setModalOpen(true);
+      return;
+    }
+    if (isSimulated) {
+      toast.error("Simulated session", "Connect a real wallet (Phantom / Solflare / MetaMask) to add tokens.");
+      return;
+    }
+    setAdding(symbol);
+    try {
+      const sig = await addTokenToWallet(mint);
+      if (sig) {
+        toast.success(`${symbol} added to wallet`, `Approved on-chain. View: ${explorerTxUrl(sig)}`);
+        refreshBalancesSoon();
+      } else {
+        toast.info(`${symbol} already in wallet`, "This token account already exists in your wallet.");
+      }
+    } catch (e) {
+      const err = e as { code?: number; message?: string };
+      toast.error(
+        err.code === 4001 ? "Approval rejected" : `Couldn't add ${symbol}`,
+        err.code === 4001 ? "You declined the wallet popup." : err.message || "Try again."
+      );
+    } finally {
+      setAdding((s) => (s === symbol ? null : s));
+    }
   };
 
   return (
@@ -47,7 +87,7 @@ export default function ImportTokens() {
         </div>
         <div>
           <div className="text-sm font-semibold text-white leading-tight">Add tokens to your wallet</div>
-          <div className="text-[10px] text-gray-500">Copy a mint, then paste it in Phantom / Solflare → Manage Token List</div>
+          <div className="text-[10px] text-gray-500">Tap ＋ to approve the token in your wallet popup, or copy the mint manually</div>
         </div>
       </div>
 
@@ -77,17 +117,28 @@ export default function ImportTokens() {
                 </div>
                 <div className="text-[10px] font-mono text-gray-500 truncate">{shortAddress(t.mint)}</div>
               </div>
-              <button
-                onClick={() => copy(t.symbol, t.mint)}
-                className={`flex items-center gap-1.5 shrink-0 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border transition-all duration-200 cursor-pointer ${
-                  isCopied
-                    ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
-                    : "bg-cyan-500/10 border-cyan-500/25 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400/40"
-                }`}
-              >
-                {isCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                {isCopied ? "Copied" : "Copy mint"}
-              </button>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={() => addToWallet(t.symbol, t.mint)}
+                  disabled={adding === t.symbol}
+                  title="Add to wallet (approve in popup)"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border transition-all duration-200 cursor-pointer bg-emerald-500/15 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25 hover:border-emerald-400/50 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {adding === t.symbol ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                  Add
+                </button>
+                <button
+                  onClick={() => copy(t.symbol, t.mint)}
+                  title="Copy mint address"
+                  className={`flex items-center justify-center h-7 w-7 rounded-lg border transition-all duration-200 cursor-pointer ${
+                    isCopied
+                      ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
+                      : "bg-cyan-500/10 border-cyan-500/25 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400/40"
+                  }`}
+                >
+                  {isCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                </button>
+              </div>
             </div>
           );
         })}
