@@ -49,7 +49,13 @@ async function signAndSubmit(b64: string): Promise<string> {
   const tx = Transaction.from(Buffer.from(b64, "base64"));
   const signed = await provider.signTransaction(tx);
   const conn = getConnection();
-  const signature = await conn.sendRawTransaction(signed.serialize());
+  // maxRetries lets the RPC keep rebroadcasting until the tx lands, so it
+  // confirms (and the token shows up in the wallet) as fast as the network allows.
+  const signature = await conn.sendRawTransaction(signed.serialize(), {
+    skipPreflight: false,
+    preflightCommitment: "confirmed",
+    maxRetries: 5,
+  });
   // Poll over HTTP (getSignatureStatus) instead of confirmTransaction, whose
   // websocket signatureSubscribe is rejected by some RPCs (e.g. Alchemy devnet).
   const { status } = await waitForReceipt(signature);

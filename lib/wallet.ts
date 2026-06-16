@@ -188,7 +188,7 @@ export async function sendActionTx({ action, symbol, toSymbol, amount, from }: T
 /** Poll the devnet for confirmation so the UI can flip pending → confirmed. */
 export async function waitForReceipt(
   signature: string,
-  { timeoutMs = 90_000, intervalMs = 2_000 } = {}
+  { timeoutMs = 90_000, intervalMs = 800 } = {}
 ): Promise<{ status: "success" | "failed" }> {
   const conn = getConnection();
   const deadline = Date.now() + timeoutMs;

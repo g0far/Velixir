@@ -14,6 +14,7 @@ import {
   PublicKey,
   Transaction,
   SystemProgram,
+  ComputeBudgetProgram,
 } from "@solana/web3.js";
 import {
   TOKEN_PROGRAM_ID,
@@ -145,6 +146,13 @@ export async function buildSettlementTx(
   const c = conn();
   const tx = new Transaction();
 
+  // Priority fee + a tight compute-unit cap so the settlement is picked up in
+  // the next block even when devnet is busy — this is what makes the swapped
+  // token actually land in the user's wallet quickly. Cost is paid by the user
+  // (fee payer) and is negligible (~0.00001 SOL).
+  tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 }));
+  tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 50_000 }));
+
   for (const leg of legs) {
     const cfg = TOKENS[leg.symbol.toUpperCase()];
     if (!cfg) throw new Error(`Unsupported token: ${leg.symbol}`);
@@ -203,7 +211,9 @@ export async function buildSettlementTx(
     }
   }
 
-  if (tx.instructions.length === 0) throw new Error("No settlement legs.");
+  // The first two instructions are the compute-budget directives; anything fewer
+  // than three means no actual settlement leg was added.
+  if (tx.instructions.length <= 2) throw new Error("No settlement legs.");
 
   const { blockhash } = await c.getLatestBlockhash("confirmed");
   tx.recentBlockhash = blockhash;

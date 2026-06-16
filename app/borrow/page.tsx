@@ -150,6 +150,7 @@ export default function BorrowPage() {
     { id: 'btc', symbol: 'BTC', name: 'Bitcoin', price: priceOf('BTC', 95000), icon: 'btc', standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.012 },
     { id: 'rialo', symbol: 'RLO', name: 'Rialo', price: priceOf('RLO', 0.968), icon: 'rialo', standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.145 },
     { id: 'usdc_col', symbol: 'USDC', name: 'USD Coin', price: priceOf('USDC', 1.00), icon: 'usdc', standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.048 },
+    { id: 'usdt_col', symbol: 'USDT', name: 'Tether USD', price: priceOf('USDT', 1.00), icon: 'usdt', standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.048 },
   ], [prices]);
 
   const borrowAssets = useMemo(() => [
