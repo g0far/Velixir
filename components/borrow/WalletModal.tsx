@@ -6,10 +6,10 @@ import { X, Wallet, ChevronRight, ShieldCheck } from 'lucide-react';
 import { useWalletStore } from '@/lib/store/walletStore';
 import { ConnectorType } from '@/lib/types/borrow';
 
-const CONNECTORS: { id: ConnectorType; tag: string }[] = [
-  { id: 'MetaMask', tag: 'EVM + SVM Real on-chain' },
+const CONNECTORS: { id: ConnectorType; tag: string; recommended?: boolean }[] = [
+  { id: 'Solflare', tag: 'Solana • Real on-chain', recommended: true },
   { id: 'Phantom', tag: 'Solana • Real on-chain' },
-  { id: 'Solflare', tag: 'Solana • Real on-chain' },
+  { id: 'MetaMask', tag: 'EVM + SVM Real on-chain' },
   { id: 'WalletConnect', tag: 'Dummy • 1000 Devnet SOL' },
 ];
 
@@ -66,7 +66,9 @@ export default function WalletModal() {
                 <button
                   key={c.id}
                   onClick={() => connect(c.id)}
-                  className="group w-full flex items-center justify-between gap-3 rounded-full border border-[#7042f880] bg-black/30 px-4 py-3 text-left transition-all hover:bg-[#7042f8]/15 hover:border-[#7042f8] shadow-[0_0_10px_rgba(112,66,248,0.15)] hover:shadow-[0_0_20px_rgba(112,66,248,0.4)] cursor-pointer"
+                  className={`group w-full flex items-center justify-between gap-3 rounded-full border bg-black/30 px-4 py-3 text-left transition-all hover:bg-[#7042f8]/15 hover:border-[#7042f8] shadow-[0_0_10px_rgba(112,66,248,0.15)] hover:shadow-[0_0_20px_rgba(112,66,248,0.4)] cursor-pointer ${
+                    c.recommended ? 'border-emerald-400/50 bg-emerald-500/5' : 'border-[#7042f880]'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-full bg-black/40 border border-[#7042f880] flex items-center justify-center overflow-hidden">
@@ -74,7 +76,14 @@ export default function WalletModal() {
                       <img src={CONNECTOR_IMG[c.id]} alt={`${c.id} logo`} className="h-6 w-6 object-contain" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white">{c.id}</p>
+                      <p className="text-xs font-bold text-white flex items-center gap-1.5">
+                        {c.id}
+                        {c.recommended && (
+                          <span className="text-[8px] font-mono font-extrabold uppercase tracking-wide text-emerald-300 bg-emerald-500/15 border border-emerald-400/30 px-1.5 py-0.5 rounded-full">
+                            Recommended
+                          </span>
+                        )}
+                      </p>
                       <p className="text-[10px] text-slate-400 font-mono">{c.tag}</p>
                     </div>
                   </div>
