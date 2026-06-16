@@ -297,14 +297,14 @@ export default function BorrowPanel({
           {/* STEP 3: Borrow Asset Selector */}
           <div className="space-y-2">
             <label className="text-[10px] font-mono uppercase tracking-widest text-indigo-300 font-bold block mb-1">
-              Step 3 — Borrow Asset
+              Step 3 — Borrow Stable Asset
             </label>
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-2 gap-3">
               {borrowAssets.map((asset) => (
                 <button
                   key={asset.symbol}
                   onClick={() => setActiveBorrow(asset.symbol)}
-                  className={`py-3 px-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                  className={`py-3 px-4 rounded-xl border transition-all cursor-pointer flex items-center justify-center gap-3 ${
                     activeBorrow === asset.symbol
                       ? 'bg-indigo-600/10 border-indigo-500/80 text-white shadow-[0_0_15px_rgba(99,102,241,0.15)]'
                       : 'bg-slate-950/40 border-white/5 text-slate-400 hover:border-white/10 hover:bg-slate-950/60'

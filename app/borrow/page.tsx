@@ -156,7 +156,6 @@ export default function BorrowPage() {
   const borrowAssets = useMemo(() => [
     { symbol: 'USDC', name: 'USD Coin', isStable: true },
     { symbol: 'USDT', name: 'Tether USD', isStable: true },
-    { symbol: 'RLO', name: 'Rialo', isStable: false },
   ], []);
 
   // ---- Trust Credentials Engine derivations ----
@@ -355,10 +354,6 @@ export default function BorrowPage() {
     const colAmount = Number(collateralAmount) || 0;
     if (amount <= 0 || colAmount <= 0) return;
     if (!engine.isValid) return;
-    // The loan size is entered in USD; settlement moves real token units, so
-    // convert by the borrow token's price (USDC/USDT ≈ 1, RLO ≈ its oracle price).
-    const borrowPrice = priceOf(activeBorrow, activeBorrow === 'RLO' ? 0.968 : 1);
-    const borrowTokenAmount = borrowPrice > 0 ? amount / borrowPrice : amount;
     // Prefer real treasury settlement (collateral out + loan in); fall back to
     // the program/memo path when no treasury is configured.
     const real = await settleReal({
@@ -367,7 +362,7 @@ export default function BorrowPage() {
       collateralSymbol: activeCollateral,
       collateralAmount: colAmount,
       borrowSymbol: activeBorrow,
-      borrowAmount: borrowTokenAmount,
+      borrowAmount: amount,
     });
     let res: { ok: boolean; signature?: string };
     if (real.fellBack) {
@@ -402,14 +397,11 @@ export default function BorrowPage() {
     }
     const target = positions[0];
     const amount = Number(borrowAmount) || 0;
-    // Repayment entered in USD → convert to token units for the on-chain transfer.
-    const repayPrice = priceOf(target.borrowAsset, target.borrowAsset === 'RLO' ? 0.968 : 1);
-    const repayTokenAmount = repayPrice > 0 ? amount / repayPrice : amount;
     const real = await settleReal({
       user: connectedAddress,
       action: 'repay',
       borrowSymbol: target.borrowAsset,
-      borrowAmount: repayTokenAmount,
+      borrowAmount: amount,
     });
     let res: { ok: boolean; signature?: string };
     if (real.fellBack) {
