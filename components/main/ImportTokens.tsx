@@ -94,7 +94,7 @@ export default function ImportTokens() {
         </div>
         <div>
           <div className="text-sm font-semibold text-white leading-tight">Add tokens to your wallet</div>
-          <div className="text-[10px] text-gray-500">Tap ＋ to approve the token in your wallet popup, or copy the mint manually</div>
+          <div className="text-[10px] text-gray-500">Tap ＋ to approve in your wallet popup — one-time faucet per wallet</div>
         </div>
       </div>
 

@@ -261,6 +261,8 @@ export async function buildAddTokenTx(
   tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 50_000 }));
 
   if (cfg.native) {
+    // Once per wallet: skip if the wallet already holds SOL.
+    if ((await c.getBalance(user)) > 0) return null;
     // Native SOL faucet — transfer lamports treasury -> user (also funds gas).
     tx.add(
       SystemProgram.transfer({
@@ -272,13 +274,9 @@ export async function buildAddTokenTx(
   } else {
     const mint = cfg.mint!;
     const userAta = getAssociatedTokenAddressSync(mint, user);
-    // Already holds a balance → token is already visible; nothing to do.
-    try {
-      const bal = await c.getTokenAccountBalance(userAta);
-      if (bal?.value && BigInt(bal.value.amount) > BigInt(0)) return null;
-    } catch {
-      /* ATA doesn't exist yet — create + fund it below */
-    }
+    // Once per wallet: if the token account already exists, it was already added.
+    const existing = await c.getAccountInfo(userAta);
+    if (existing) return null;
     const base = toBaseUnits(uiAmount, cfg.decimals);
     // payer = treasury → treasury covers rent + fee (user needs no SOL).
     tx.add(createAssociatedTokenAccountIdempotentInstruction(treasury.publicKey, userAta, user, mint));
