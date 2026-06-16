@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import React, { useState, useRef, useEffect } from "react";
 
 import { usePathname } from "next/navigation";
@@ -110,7 +111,7 @@ const Navbar = () => {
     return (
         <div className="w-screen md:w-full h-[65px] fixed top-0 left-0 right-0 mx-auto shadow-lg shadow-black/20 bg-[#03001490] border-b border-white/10 backdrop-blur-md z-50 px-4 md:px-10 max-w-[1855px] items-center rounded-full">
             <div className="relative w-full h-full flex flex-row items-center justify-between m-auto px-[0px] md:px-[10px]">
-                <a
+                <Link
                     href={pathname === "/" ? "#home" : "/"}
                     className="h-auto w-auto flex flex-row items-center cursor-pointer"
                     onClick={() => setActiveTab("Home")}
@@ -122,11 +123,11 @@ const Navbar = () => {
                         height={40}
                         className="cursor-pointer hover:animate-spin w-10 mr-[10px]"
                     />
-                    
+
                     <span className="font-bold block text-white z-50 md:text-lg text-xl">
                         VELIXIR
                     </span>
-                </a>
+                </Link>
 
                 {/* Sliding indicator navigation matching Borrow page design */}
                 <div className="hidden md:flex relative items-center justify-center md:absolute md:left-1/2 md:-translate-x-1/2">
@@ -194,7 +195,7 @@ const Navbar = () => {
                                                         zIndex: 0,
                                                     }}
                                                 />
-                                                <a
+                                                <Link
                                                     href="/project"
                                                     onMouseEnter={() => setHoveredIdx(0)}
                                                     onMouseLeave={() => setHoveredIdx(null)}
@@ -207,8 +208,8 @@ const Navbar = () => {
                                                     }`}
                                                 >
                                                     Project
-                                                </a>
-                                                <a
+                                                </Link>
+                                                <Link
                                                     href="/docs"
                                                     onMouseEnter={() => setHoveredIdx(1)}
                                                     onMouseLeave={() => setHoveredIdx(null)}
@@ -221,14 +222,14 @@ const Navbar = () => {
                                                     }`}
                                                 >
                                                     Docs
-                                                </a>
+                                                </Link>
                                             </div>
                                         )}
                                     </div>
                                 );
                             }
                             return (
-                                <a
+                                <Link
                                     key={tab.name}
                                     ref={(el) => { btnRefs.current[idx] = el; }}
                                     href={pathname === "/" ? tab.href : (tab.href.startsWith("#") ? `/${tab.href}` : tab.href)}
@@ -240,7 +241,7 @@ const Navbar = () => {
                                     }`}
                                 >
                                     {tab.name}
-                                </a>
+                                </Link>
                             );
                         })}
                     </nav>
@@ -399,7 +400,7 @@ const Navbar = () => {
                                                     zIndex: 0,
                                                 }}
                                             />
-                                            <a
+                                            <Link
                                                 href="/project"
                                                 onMouseEnter={() => setMobileHoveredIdx(0)}
                                                 onMouseLeave={() => setMobileHoveredIdx(null)}
@@ -413,8 +414,8 @@ const Navbar = () => {
                                                 }`}
                                             >
                                                 Project
-                                            </a>
-                                            <a
+                                            </Link>
+                                            <Link
                                                 href="/docs"
                                                 onMouseEnter={() => setMobileHoveredIdx(1)}
                                                 onMouseLeave={() => setMobileHoveredIdx(null)}
@@ -428,14 +429,14 @@ const Navbar = () => {
                                                 }`}
                                             >
                                                 Docs
-                                            </a>
+                                            </Link>
                                         </div>
                                     )}
                                 </div>
                             );
                         }
                         return (
-                            <a
+                            <Link
                                 key={tab.name}
                                 href={pathname === "/" ? tab.href : (tab.href.startsWith("#") ? `/${tab.href}` : tab.href)}
                                 onClick={() => { setActiveTab(tab.name); setMobileMenuOpen(false); }}
@@ -446,7 +447,7 @@ const Navbar = () => {
                                 }`}
                             >
                                 {tab.name}
-                            </a>
+                            </Link>
                         );
                     })}
                 </div>

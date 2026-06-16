@@ -75,10 +75,12 @@ export default function BorrowPanel({
   const collateralBalance = (() => {
     if (!connected) return 0;
     const sym = activeCollateral.toUpperCase();
-    if (isSimulated) return sym === 'SOL' ? parseFloat(walletSol) || 0 : 0;
+    // SOL always tracks the wallet-store balance (same source as the navbar);
+    // every other token reads the shared balance store so the swap, borrow and
+    // liquidity pages always show identical figures.
+    if (sym === 'SOL') return parseFloat(walletSol) || 0;
     const real = realBalances[sym];
-    if (typeof real === 'number') return real;
-    return sym === 'SOL' ? parseFloat(walletSol) || 0 : 0;
+    return typeof real === 'number' ? real : 0;
   })();
 
   const fmtBalance = (v: number) =>

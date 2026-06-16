@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useWalletStore } from "@/lib/store/walletStore";
+import { useBalanceStore } from "@/lib/store/balanceStore";
 import { useTrustStore, DEFAULT_CREDENTIALS } from "@/lib/store/trustStore";
 import { useBorrowStore } from "@/lib/store/borrowStore";
 import { useHistoryStore } from "@/lib/store/historyStore";
@@ -11,6 +12,7 @@ import { toast } from "@/lib/store/toastStore";
 
 export default function ProfileSync() {
   const connectedAddress = useWalletStore((s) => s.connected ? s.address : "");
+  const isSimulated = useWalletStore((s) => s.isSimulated);
   const [activeAddress, setActiveAddress] = useState<string>("");
   const [mounted, setMounted] = useState<boolean>(false);
 
@@ -23,6 +25,20 @@ export default function ProfileSync() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Bootstrap wallet balances globally so every page (swap, borrow, liquidity)
+  // reads the same figures: real on-chain amounts for a connected wallet, or the
+  // shared demo seed for a simulated session.
+  useEffect(() => {
+    if (!mounted) return;
+    const { connected } = useWalletStore.getState();
+    if (!connected) return;
+    if (isSimulated) {
+      useBalanceStore.getState().seedSimulated();
+    } else if (connectedAddress) {
+      useBalanceStore.getState().refresh();
+    }
+  }, [mounted, isSimulated, connectedAddress]);
 
   // Sync / Switch Profile logic
   useEffect(() => {

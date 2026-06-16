@@ -107,17 +107,24 @@ const MarketTradePanel = ({ tokens, selectedToken, onTokenChange }: MarketTradeP
 
   const recordSwap = useSwapHistoryStore((s) => s.record);
 
-  // Real on-chain wallet balances (SOL + SPL) for the connected wallet.
+  // Wallet balances (SOL + SPL). For a real wallet these are the actual on-chain
+  // amounts (matching Phantom/Solflare); for a simulated session they're seeded
+  // demo figures. Either way the panel and the navbar read the same source.
   const realBalances = useBalanceStore((s) => s.balances);
   const refreshBalances = useBalanceStore((s) => s.refresh);
   const refreshBalancesSoon = useBalanceStore((s) => s.refreshSoon);
+  const seedSimulatedBalances = useBalanceStore((s) => s.seedSimulated);
+  const applyBalanceDelta = useBalanceStore((s) => s.applyDelta);
 
   const account = connected ? globalAddress : null;
 
-  // Load real balances whenever a non-simulated wallet is connected.
+  // Keep balances loaded: real on-chain figures for a connected wallet, or the
+  // demo seed for a simulated session.
   useEffect(() => {
-    if (connected && !isSimulated && globalAddress) refreshBalances();
-  }, [connected, isSimulated, globalAddress, refreshBalances]);
+    if (!connected) return;
+    if (isSimulated) seedSimulatedBalances();
+    else if (globalAddress) refreshBalances();
+  }, [connected, isSimulated, globalAddress, refreshBalances, seedSimulatedBalances]);
 
   // Build a SwapTx, push it to the live in-session list, and persist it under
   // the connected wallet so it survives disconnect/reconnect and reloads.
@@ -145,20 +152,15 @@ const MarketTradePanel = ({ tokens, selectedToken, onTokenChange }: MarketTradeP
   const getBalance = (symbol: string) => {
     if (!connected) return "0.0";
     const sym = symbol.toUpperCase();
-    // Real wallet: show actual on-chain balances (matches Phantom/Solflare).
-    if (!isSimulated) {
-      const real = realBalances[sym];
-      if (typeof real === "number") return real.toFixed(sym === "SOL" || sym === "RLO" ? 4 : 4);
-      if (sym === "SOL") return parseFloat(walletBalance).toFixed(4);
-      return "0.0000";
-    }
-    // Simulated session: keep the demo placeholders.
-    if (sym === "SOL") return parseFloat(walletBalance).toFixed(4);
-    if (sym === "BTC") return "0.4500";
-    if (sym === "USDC") return "250.0000";
-    if (sym === "USDT") return "250.0000";
-    if (sym === "RLO") return "1500.0000";
-    return "0.0";
+    // SOL is always the live wallet-store balance — kept in sync with the real
+    // on-chain amount by refresh() and nudged by applyDelta() after swaps, so
+    // the navbar and this panel never disagree.
+    if (sym === "SOL") return parseFloat(walletBalance || "0").toFixed(4);
+    // Every other token comes from the shared balance store (real on-chain when
+    // a wallet is connected, demo seed when simulated).
+    const v = realBalances[sym];
+    if (typeof v === "number") return v.toFixed(4);
+    return "0.0000";
   };
 
   // Resolve the receive token from the live list; never equal to the pay token.
@@ -222,6 +224,8 @@ const MarketTradePanel = ({ tokens, selectedToken, onTokenChange }: MarketTradeP
         setStage("success");
 
         logSwap(hash);
+        // Reflect the swap in the displayed balances immediately.
+        applyBalanceDelta({ [fromToken.symbol]: -numAmount, [toToken.symbol]: receiveAmount });
         return;
       }
 
@@ -238,8 +242,9 @@ const MarketTradePanel = ({ tokens, selectedToken, onTokenChange }: MarketTradeP
         setTxHash(signature);
         setStage("success");
         logSwap(signature);
-        // Re-read balances so the UI reflects the settled wallet state.
-        refreshBalances();
+        // Reflect the swap instantly, then poll the chain to reconcile with the
+        // exact settled balances (covers fees / RPC propagation lag).
+        applyBalanceDelta({ [fromToken.symbol]: -numAmount, [toToken.symbol]: receiveAmount });
         refreshBalancesSoon();
       } catch (swapErr) {
         if (swapErr instanceof TreasuryUnavailableError) {

@@ -292,17 +292,19 @@ export default function LiquidityPage() {
   const totalTvl = lendingTvl + ammTvl + pairsTvl;
   const poolCount = integratedLendingPools.length + (amm ? 1 : 0) + pairs.length;
 
-  // Derived staking values
+  // Derived staking values. The wallet base comes from the shared balance store
+  // (real on-chain amount, or the demo seed when simulated) so swaps elsewhere
+  // are reflected here; staking moves and claims are then applied on top.
   const rloBalance = useMemo(() => {
     if (!connected) return 0;
-    if (isSimulated) return Math.max(0, 1500 + claimedRlo - stakedRlo);
-    return realBalances["RLO"] ?? 0;
+    const walletRlo = realBalances["RLO"] ?? (isSimulated ? 1500 : 0);
+    return Math.max(0, walletRlo + claimedRlo - stakedRlo);
   }, [connected, isSimulated, stakedRlo, claimedRlo, realBalances]);
 
   const lpBalance = useMemo(() => {
     if (!connected) return 0;
-    if (isSimulated) return Math.max(0, 500 + claimedLp - stakedLp);
-    return realBalances["LP"] ?? 0;
+    const walletLp = realBalances["LP"] ?? (isSimulated ? 500 : 0);
+    return Math.max(0, walletLp + claimedLp - stakedLp);
   }, [connected, isSimulated, stakedLp, claimedLp, realBalances]);
 
   const lpPrice = useMemo(() => {
