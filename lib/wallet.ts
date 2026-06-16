@@ -280,7 +280,12 @@ export async function sendActionTx({ action, symbol, toSymbol, amount, from }: T
  * token shows up in Phantom/Solflare/MetaMask. Idempotent if the ATA exists.
  * Returns the tx signature, or null when the account already existed.
  */
-export async function addTokenToWallet(mint: string): Promise<string | null> {
+export interface AddTokenResult {
+  signature: string;
+  amount: number; // faucet amount credited (0 when only the account was created)
+}
+
+export async function addTokenToWallet(symbol: string, mint: string): Promise<AddTokenResult | null> {
   const provider = getProvider();
   if (!provider?.signTransaction) throw new Error("Connect a Solana wallet first.");
   const ownerStr = provider.publicKey?.toString();
@@ -298,17 +303,21 @@ export async function addTokenToWallet(mint: string): Promise<string | null> {
     return sig;
   };
 
-  // Preferred: treasury-sponsored creation — works even if the wallet has 0 SOL.
+  // Preferred: treasury-sponsored creation + small faucet — works even with 0 SOL
+  // and credits a balance so the token actually shows in the wallet.
   try {
     const res = await fetch("/api/add-token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user: ownerStr, mint }),
+      body: JSON.stringify({ user: ownerStr, symbol }),
     });
     if (res.ok) {
-      const j = (await res.json()) as { tx?: string; alreadyExists?: boolean };
+      const j = (await res.json()) as { tx?: string; alreadyExists?: boolean; amount?: number };
       if (j.alreadyExists) return null;
-      if (j.tx) return submit(Transaction.from(Buffer.from(j.tx, "base64")));
+      if (j.tx) {
+        const signature = await submit(Transaction.from(Buffer.from(j.tx, "base64")));
+        return { signature, amount: j.amount ?? 0 };
+      }
     } else if (res.status !== 503) {
       const j = await res.json().catch(() => ({}));
       throw new Error(j?.error || `Add-token failed (${res.status}).`);
@@ -319,7 +328,7 @@ export async function addTokenToWallet(mint: string): Promise<string | null> {
     if ((e as { code?: number })?.code === 4001) throw e;
   }
 
-  // Fallback: self-paid ATA creation (requires the wallet to hold some SOL).
+  // Fallback: self-paid empty ATA creation (requires the wallet to hold some SOL).
   const owner = new PublicKey(ownerStr);
   const mintPk = new PublicKey(mint);
   const ata = getAssociatedTokenAddressSync(mintPk, owner);
@@ -331,7 +340,8 @@ export async function addTokenToWallet(mint: string): Promise<string | null> {
   const { blockhash } = await conn.getLatestBlockhash("confirmed");
   tx.recentBlockhash = blockhash;
   tx.feePayer = owner;
-  return submit(tx);
+  const signature = await submit(tx);
+  return { signature, amount: 0 };
 }
 
 /** Poll the devnet for confirmation so the UI can flip pending → confirmed. */

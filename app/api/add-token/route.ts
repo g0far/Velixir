@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function POST(req: NextRequest) {
-  let body: { user?: string; mint?: string };
+  let body: { user?: string; symbol?: string };
   try {
     body = await req.json();
   } catch {
@@ -18,18 +18,18 @@ export async function POST(req: NextRequest) {
   }
 
   let user: PublicKey;
-  let mint: PublicKey;
   try {
     user = new PublicKey(String(body.user));
-    mint = new PublicKey(String(body.mint));
   } catch {
-    return NextResponse.json({ error: "Invalid user or mint address." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid user address." }, { status: 400 });
   }
+  const symbol = String(body.symbol || "");
+  if (!symbol) return NextResponse.json({ error: "Missing token symbol." }, { status: 400 });
 
   try {
-    const built = await buildAddTokenTx(user, mint);
+    const built = await buildAddTokenTx(user, symbol);
     if (!built) return NextResponse.json({ alreadyExists: true });
-    return NextResponse.json({ tx: built.b64, treasury: built.treasury });
+    return NextResponse.json({ tx: built.b64, treasury: built.treasury, amount: built.amount });
   } catch (e) {
     const msg = (e as Error).message;
     if (msg === "TREASURY_NOT_CONFIGURED") {

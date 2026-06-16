@@ -232,35 +232,68 @@ export async function buildSettlementTx(
 
 const MEMO_PROGRAM = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
 
+// Small faucet credited when adding a token, so it shows up in the wallet
+// (wallets hide zero-balance SPL accounts). Also handy for testing borrow/supply.
+const ADD_TOKEN_FAUCET_UI: Record<string, number> = { USDC: 100, USDT: 100, RLO: 100 };
+
 /**
  * Build a treasury-SPONSORED "add token" transaction: the treasury pays the rent
- * + fee to create the user's associated token account, so the token shows up in
- * the wallet even when the user has no SOL. A memo instruction requires the
- * user's signature, so the wallet still shows an approval popup. Returns null
- * when the account already exists (nothing to do).
+ * + fee, creates the user's associated token account, and credits a small faucet
+ * amount so the token actually shows in the wallet (wallets hide 0-balance
+ * accounts). A memo requires the user's signature, so the wallet shows an
+ * approval popup. Returns null when the user already holds a balance.
  */
 export async function buildAddTokenTx(
   user: PublicKey,
-  mint: PublicKey
-): Promise<{ b64: string; treasury: string } | null> {
+  symbol: string
+): Promise<{ b64: string; treasury: string; amount: number } | null> {
   const treasury = loadTreasury();
   if (!treasury) throw new Error("TREASURY_NOT_CONFIGURED");
 
+  const sym = symbol.toUpperCase();
+  const cfg = TOKENS[sym];
+  if (!cfg || !cfg.mint) throw new Error(`Unsupported token: ${symbol}`);
+  const mint = cfg.mint;
+
   const c = conn();
   const userAta = getAssociatedTokenAddressSync(mint, user);
-  const existing = await c.getAccountInfo(userAta);
-  if (existing) return null; // already registered in the wallet
+  // Already holds a balance → token is already visible; nothing to do.
+  try {
+    const bal = await c.getTokenAccountBalance(userAta);
+    if (bal?.value && BigInt(bal.value.amount) > BigInt(0)) return null;
+  } catch {
+    /* ATA doesn't exist yet — create + fund it below */
+  }
+
+  const uiAmount = ADD_TOKEN_FAUCET_UI[sym] ?? 50;
+  const base = toBaseUnits(uiAmount, cfg.decimals);
 
   const tx = new Transaction();
   tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 50_000 }));
   // payer = treasury → treasury covers rent + fee (user needs no SOL).
   tx.add(createAssociatedTokenAccountIdempotentInstruction(treasury.publicKey, userAta, user, mint));
-  // Force the user's signature so the wallet shows an approval popup (no debit).
+
+  // Credit the faucet: mint when the treasury is the mint authority, else transfer.
+  let isMintAuthority = false;
+  try {
+    const mintInfo = await getMint(c, mint);
+    isMintAuthority = !!mintInfo.mintAuthority && mintInfo.mintAuthority.equals(treasury.publicKey);
+  } catch {
+    isMintAuthority = false;
+  }
+  if (isMintAuthority) {
+    tx.add(createMintToInstruction(mint, userAta, treasury.publicKey, base, [], TOKEN_PROGRAM_ID));
+  } else {
+    const treAta = getAssociatedTokenAddressSync(mint, treasury.publicKey);
+    tx.add(createTransferInstruction(treAta, userAta, treasury.publicKey, base, [], TOKEN_PROGRAM_ID));
+  }
+
+  // Force the user's signature so the wallet shows an approval popup.
   tx.add(
     new TransactionInstruction({
       keys: [{ pubkey: user, isSigner: true, isWritable: false }],
       programId: MEMO_PROGRAM,
-      data: Buffer.from(`VELIXIR:ADD_TOKEN:${mint.toBase58()}`, "utf8"),
+      data: Buffer.from(`VELIXIR:ADD_TOKEN:${sym}`, "utf8"),
     })
   );
 
@@ -270,5 +303,5 @@ export async function buildAddTokenTx(
   tx.partialSign(treasury);
 
   const serialized = tx.serialize({ requireAllSignatures: false, verifySignatures: false });
-  return { b64: serialized.toString("base64"), treasury: treasury.publicKey.toBase58() };
+  return { b64: serialized.toString("base64"), treasury: treasury.publicKey.toBase58(), amount: uiAmount };
 }

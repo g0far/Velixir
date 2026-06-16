@@ -56,12 +56,17 @@ export default function ImportTokens() {
     }
     setAdding(symbol);
     try {
-      const sig = await addTokenToWallet(mint);
-      if (sig) {
-        toast.success(`${symbol} added to wallet`, `Approved on-chain. View: ${explorerTxUrl(sig)}`);
+      const res = await addTokenToWallet(symbol, mint);
+      if (res) {
+        toast.success(
+          `${symbol} added to wallet`,
+          res.amount > 0
+            ? `${res.amount} ${symbol} credited so it shows in your wallet. View: ${explorerTxUrl(res.signature)}`
+            : `Approved on-chain. View: ${explorerTxUrl(res.signature)}`
+        );
         refreshBalancesSoon();
       } else {
-        toast.info(`${symbol} already in wallet`, "This token account already exists in your wallet.");
+        toast.info(`${symbol} already in wallet`, "You already hold this token.");
       }
     } catch (e) {
       const err = e as { code?: number; message?: string };

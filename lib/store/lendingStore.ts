@@ -33,7 +33,6 @@ export const LENDING_POOLS: LendingPool[] = [
   { symbol: 'USDC', label: 'USDC',  risk: 'Low',    base: 0.005, slope1: 0.14, slope2: 0.90, optimalU: 0.90, reserve: 0.10, trustPremium: 0.025, seedSuppliedUSD: 2_400_000, seedBorrowedUSD: 1_872_000 },
   { symbol: 'USDT', label: 'USDT',  risk: 'Low',    base: 0.005, slope1: 0.14, slope2: 0.90, optimalU: 0.90, reserve: 0.10, trustPremium: 0.025, seedSuppliedUSD: 1_800_000, seedBorrowedUSD: 1_278_000 },
   { symbol: 'SOL',  label: 'SOL',   risk: 'Medium', base: 0.010, slope1: 0.10, slope2: 1.20, optimalU: 0.80, reserve: 0.15, trustPremium: 0.020, seedSuppliedUSD: 1_100_000, seedBorrowedUSD: 682_000 },
-  { symbol: 'BTC',  label: 'BTC',   risk: 'Low',    base: 0.010, slope1: 0.10, slope2: 1.20, optimalU: 0.80, reserve: 0.15, trustPremium: 0.020, seedSuppliedUSD: 890_000,   seedBorrowedUSD: 453_900 },
 ];
 
 export const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;
