@@ -3,8 +3,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import AmountModal from "./AmountModal";
 import { useWalletStore } from "@/lib/store/walletStore";
+import { useBalanceStore } from "@/lib/store/balanceStore";
 import { useOracleStore } from "@/lib/store/oracleStore";
 import { toast } from "@/lib/store/toastStore";
+import { executeTreasuryLend, TreasuryUnavailableError } from "@/lib/swap";
+import { explorerTxUrl } from "@/lib/wallet";
 import {
   LENDING_POOLS,
   LendingPool,
@@ -94,7 +97,13 @@ interface AggPosition {
 export default function LendingSupplySection() {
   const connected = useWalletStore((s) => s.connected);
   const address = useWalletStore((s) => (s.connected ? s.address : ""));
+  const isSimulated = useWalletStore((s) => s.isSimulated);
   const setWalletModalOpen = useWalletStore((s) => s.setModalOpen);
+
+  const applyBalanceDelta = useBalanceStore((s) => s.applyDelta);
+  const refreshBalancesSoon = useBalanceStore((s) => s.refreshSoon);
+
+  const [submitting, setSubmitting] = useState(false);
 
   const prices = useOracleStore((s) => s.prices);
   const startOracle = useOracleStore((s) => s.start);
@@ -175,23 +184,80 @@ export default function LendingSupplySection() {
     setModalPool(pool);
   };
 
-  const confirmSupply = (amount: number) => {
-    if (!modalPool || !address) return;
-    const price = priceOf(modalPool.symbol, FALLBACK[modalPool.symbol] ?? 1);
-    supply(address, modalPool.symbol, amount);
-    toast.success(
-      "Supplied to pool",
-      `${fmtToken(amount)} ${modalPool.label} (~${fmtUSD(amount * price)}) is now earning ${(computeSupplyAPY(modalPool, computeUtilization(modalPool, 0)) * 100).toFixed(1)}% APY.`
-    );
+  const confirmSupply = async (amount: number) => {
+    if (!modalPool || !address || !(amount > 0)) return;
+    const pool = modalPool;
+    const sym = pool.symbol;
+    const price = priceOf(sym, FALLBACK[sym] ?? 1);
     setModalPool(null);
+    setSubmitting(true);
+    let onchain = false;
+    try {
+      // Real on-chain deposit (asset leaves the wallet into the treasury pool).
+      if (connected && !isSimulated) {
+        try {
+          const sig = await executeTreasuryLend({ user: address, action: "supply", symbol: sym, amount });
+          onchain = true;
+          toast.success("Supply confirmed on-chain", `View: ${explorerTxUrl(sig)}`);
+        } catch (e) {
+          if (e instanceof TreasuryUnavailableError) {
+            /* no treasury — record as a simulated supply */
+          } else {
+            const err = e as { code?: number; message?: string };
+            toast.error(
+              err.code === 4001 ? "Transaction rejected" : "Supply failed",
+              err.code === 4001 ? "You declined the transaction." : err.message || "Could not settle on-chain."
+            );
+            return;
+          }
+        }
+      }
+      supply(address, sym, amount);
+      applyBalanceDelta({ [sym]: -amount });
+      if (onchain) refreshBalancesSoon();
+      toast.success(
+        "Supplied to pool",
+        `${fmtToken(amount)} ${pool.label} (~${fmtUSD(amount * price)}) is now earning ${(computeSupplyAPY(pool, computeUtilization(pool, 0)) * 100).toFixed(1)}% APY.`
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const doWithdraw = (pool: LendingPool, agg: AggPosition) => {
-    withdraw(address, pool.symbol);
-    toast.success(
-      "Withdrawal complete",
-      `${fmtUSD(agg.principalUSD + agg.earnedUSD)} returned to your wallet (${fmtUSD(agg.earnedUSD)} yield earned).`
-    );
+  const doWithdraw = async (pool: LendingPool, agg: AggPosition) => {
+    if (!address || submitting) return;
+    setSubmitting(true);
+    let onchain = false;
+    try {
+      // Real on-chain withdrawal (principal returned treasury -> wallet).
+      if (connected && !isSimulated) {
+        try {
+          const sig = await executeTreasuryLend({ user: address, action: "withdraw", symbol: pool.symbol, amount: agg.amount });
+          onchain = true;
+          toast.success("Withdrawal confirmed on-chain", `View: ${explorerTxUrl(sig)}`);
+        } catch (e) {
+          if (e instanceof TreasuryUnavailableError) {
+            /* no treasury — record as a simulated withdrawal */
+          } else {
+            const err = e as { code?: number; message?: string };
+            toast.error(
+              err.code === 4001 ? "Transaction rejected" : "Withdrawal failed",
+              err.code === 4001 ? "You declined the transaction." : err.message || "Could not settle on-chain."
+            );
+            return;
+          }
+        }
+      }
+      withdraw(address, pool.symbol);
+      applyBalanceDelta({ [pool.symbol]: agg.amount });
+      if (onchain) refreshBalancesSoon();
+      toast.success(
+        "Withdrawal complete",
+        `${fmtToken(agg.amount)} ${pool.label} (~${fmtUSD(agg.principalUSD)}) returned to your wallet${onchain ? "" : ` (${fmtUSD(agg.earnedUSD)} yield earned)`}.`
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -263,9 +329,10 @@ export default function LendingSupplySection() {
                 </div>
                 <button
                   onClick={() => openSupply(pool)}
-                  className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all cursor-pointer shrink-0"
+                  disabled={submitting}
+                  className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all cursor-pointer shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Supply
+                  {submitting ? "…" : "Supply"}
                 </button>
               </div>
 
@@ -284,9 +351,10 @@ export default function LendingSupplySection() {
                   </div>
                   <button
                     onClick={() => doWithdraw(pool, agg)}
-                    className="px-3 py-1 rounded-lg border border-white/10 text-slate-300 hover:text-white hover:border-white/20 text-[11px] font-bold transition-all cursor-pointer"
+                    disabled={submitting}
+                    className="px-3 py-1 rounded-lg border border-white/10 text-slate-300 hover:text-white hover:border-white/20 text-[11px] font-bold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Withdraw
+                    {submitting ? "…" : "Withdraw"}
                   </button>
                 </div>
               )}

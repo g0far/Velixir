@@ -100,3 +100,20 @@ export async function executeTreasuryBorrow(req: BorrowSettleRequest): Promise<s
   const { tx: b64 } = await requestSettlement("/api/borrow", req);
   return signAndSubmit(b64);
 }
+
+export interface LendSettleRequest {
+  user: string;
+  action: "supply" | "withdraw";
+  symbol: string;
+  amount: number;
+}
+
+/**
+ * Execute a real on-chain lending supply/withdraw settled by the treasury.
+ * Supply moves the asset user→treasury; withdraw returns it treasury→user.
+ * Throws TreasuryUnavailableError when no treasury is configured.
+ */
+export async function executeTreasuryLend(req: LendSettleRequest): Promise<string> {
+  const { tx: b64 } = await requestSettlement("/api/lend", req);
+  return signAndSubmit(b64);
+}
