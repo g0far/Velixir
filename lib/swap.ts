@@ -42,8 +42,13 @@ async function requestSettlement(path: string, payload: unknown): Promise<{ tx: 
   return res.json();
 }
 
-/** Have the wallet sign the prebuilt tx, submit it, and wait for confirmation. */
-async function signAndSubmit(b64: string): Promise<string> {
+/**
+ * Have the wallet sign the prebuilt tx, submit it, and wait for confirmation.
+ * `onSubmitted` fires the instant the tx is broadcast (right after the user
+ * approves in their wallet) — before confirmation — so the UI can sync balances
+ * with zero perceived delay and reconcile with the exact on-chain values after.
+ */
+async function signAndSubmit(b64: string, onSubmitted?: (sig: string) => void): Promise<string> {
   const provider = getProvider();
   if (!provider?.signTransaction) throw new Error("Wallet cannot sign transactions.");
   const tx = Transaction.from(Buffer.from(b64, "base64"));
@@ -56,6 +61,7 @@ async function signAndSubmit(b64: string): Promise<string> {
     preflightCommitment: "confirmed",
     maxRetries: 5,
   });
+  onSubmitted?.(signature);
   // Poll over HTTP (getSignatureStatus) instead of confirmTransaction, whose
   // websocket signatureSubscribe is rejected by some RPCs (e.g. Alchemy devnet).
   const { status } = await waitForReceipt(signature);
@@ -68,9 +74,12 @@ async function signAndSubmit(b64: string): Promise<string> {
  * Throws TreasuryUnavailableError (HTTP 503) when TREASURY_SECRET_KEY isn't set,
  * so callers can fall back to the simulated path.
  */
-export async function executeTreasurySwap(req: SwapRequest): Promise<SwapResult> {
+export async function executeTreasurySwap(
+  req: SwapRequest,
+  opts?: { onSubmitted?: (sig: string) => void }
+): Promise<SwapResult> {
   const { tx: b64, amountOut } = await requestSettlement("/api/swap", req);
-  const signature = await signAndSubmit(b64);
+  const signature = await signAndSubmit(b64, opts?.onSubmitted);
   return { signature, amountOut: amountOut ?? 0 };
 }
 

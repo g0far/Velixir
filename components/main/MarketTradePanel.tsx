@@ -233,18 +233,28 @@ const MarketTradePanel = ({ tokens, selectedToken, onTokenChange }: MarketTradeP
       // actual token balances move on-chain (visible in Phantom/Solflare).
       setStage("signing");
       try {
-        const { signature } = await executeTreasurySwap({
-          user: account,
-          fromSymbol: fromToken.symbol,
-          toSymbol: toToken.symbol,
-          amountIn: numAmount,
-        });
+        const { signature } = await executeTreasurySwap(
+          {
+            user: account,
+            fromSymbol: fromToken.symbol,
+            toSymbol: toToken.symbol,
+            amountIn: numAmount,
+          },
+          {
+            // Fires the moment the tx is broadcast (right after wallet approval):
+            // sync the displayed balances instantly, with no wait for confirmation.
+            onSubmitted: (sig) => {
+              setTxHash(sig);
+              setStage("pending");
+              applyBalanceDelta({ [fromToken.symbol]: -numAmount, [toToken.symbol]: receiveAmount });
+            },
+          }
+        );
         setTxHash(signature);
         setStage("success");
         logSwap(signature);
-        // Reflect the swap instantly, then poll the chain to reconcile with the
-        // exact settled balances (covers fees / RPC propagation lag).
-        applyBalanceDelta({ [fromToken.symbol]: -numAmount, [toToken.symbol]: receiveAmount });
+        // Confirmed: reconcile with the exact on-chain balances (covers fees).
+        refreshBalances();
         refreshBalancesSoon();
       } catch (swapErr) {
         if (swapErr instanceof TreasuryUnavailableError) {
