@@ -55,6 +55,17 @@ declare global {
 
 export type WalletName = "Phantom" | "Solflare";
 
+// The wallet the user actually connected with. Every signing path resolves the
+// provider through getProvider() with no argument, so we remember the active
+// wallet here — otherwise, with both extensions installed, signing could be sent
+// to the wrong (unconnected) wallet and no approval popup would appear.
+let activeWalletName: WalletName | null = null;
+
+/** Forget the active wallet (call on disconnect). */
+export function clearActiveWallet(): void {
+  activeWalletName = null;
+}
+
 /** Human-readable name for whichever provider is active. */
 export function providerName(p: SolanaProvider | null): WalletName | null {
   if (!p) return null;
@@ -82,8 +93,11 @@ export function getProvider(prefer?: WalletName): SolanaProvider | null {
       ? window.solflare
       : null;
 
-  if (prefer === "Phantom" && phantom) return phantom;
-  if (prefer === "Solflare" && solflare) return solflare;
+  // Honor the explicit choice, then the wallet the user connected with, before
+  // falling back to whatever is connected/injected.
+  const want = prefer ?? activeWalletName ?? undefined;
+  if (want === "Phantom" && phantom) return phantom;
+  if (want === "Solflare" && solflare) return solflare;
   // Prefer one that's already connected (keeps the active session stable).
   if (phantom?.isConnected) return phantom;
   if (solflare?.isConnected) return solflare;
@@ -129,6 +143,8 @@ export async function connectWallet(prefer?: WalletName): Promise<string> {
       : undefined) ?? provider.publicKey?.toString();
   if (!pubkey) pubkey = await waitForPublicKey(provider);
   if (!pubkey) throw new Error("No account authorized.");
+  // Remember which wallet is active so later signing goes to the same provider.
+  activeWalletName = providerName(provider) ?? prefer ?? null;
   return pubkey;
 }
 

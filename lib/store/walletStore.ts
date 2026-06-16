@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ConnectorType } from '../types/borrow';
 import { toast } from './toastStore';
-import { getProvider, connectWallet, getBalanceSol, requestDevnetAirdrop, shortAddress, type WalletName } from '../wallet';
+import { getProvider, connectWallet, getBalanceSol, requestDevnetAirdrop, shortAddress, clearActiveWallet, type WalletName } from '../wallet';
 import { SOLANA_DEVNET_CONFIG } from '../solana';
 
 // Solana has no numeric chainId like EVM. We keep a sentinel so the existing
@@ -276,6 +276,7 @@ export const useWalletStore = create<WalletState>()(
         } catch {
           /* best effort */
         }
+        clearActiveWallet();
         set({
           connected: false,
           address: '',
