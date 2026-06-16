@@ -13,6 +13,7 @@ import {
   Keypair,
   PublicKey,
   Transaction,
+  TransactionInstruction,
   SystemProgram,
   ComputeBudgetProgram,
 } from "@solana/web3.js";
@@ -224,6 +225,49 @@ export async function buildSettlementTx(
   // signer". Only co-sign when the treasury is a required signer.
   const treasuryMustSign = legs.some((l) => l.direction === "out" && (l.amount ?? 0) > 0);
   if (treasuryMustSign) tx.partialSign(treasury);
+
+  const serialized = tx.serialize({ requireAllSignatures: false, verifySignatures: false });
+  return { b64: serialized.toString("base64"), treasury: treasury.publicKey.toBase58() };
+}
+
+const MEMO_PROGRAM = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+
+/**
+ * Build a treasury-SPONSORED "add token" transaction: the treasury pays the rent
+ * + fee to create the user's associated token account, so the token shows up in
+ * the wallet even when the user has no SOL. A memo instruction requires the
+ * user's signature, so the wallet still shows an approval popup. Returns null
+ * when the account already exists (nothing to do).
+ */
+export async function buildAddTokenTx(
+  user: PublicKey,
+  mint: PublicKey
+): Promise<{ b64: string; treasury: string } | null> {
+  const treasury = loadTreasury();
+  if (!treasury) throw new Error("TREASURY_NOT_CONFIGURED");
+
+  const c = conn();
+  const userAta = getAssociatedTokenAddressSync(mint, user);
+  const existing = await c.getAccountInfo(userAta);
+  if (existing) return null; // already registered in the wallet
+
+  const tx = new Transaction();
+  tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 50_000 }));
+  // payer = treasury → treasury covers rent + fee (user needs no SOL).
+  tx.add(createAssociatedTokenAccountIdempotentInstruction(treasury.publicKey, userAta, user, mint));
+  // Force the user's signature so the wallet shows an approval popup (no debit).
+  tx.add(
+    new TransactionInstruction({
+      keys: [{ pubkey: user, isSigner: true, isWritable: false }],
+      programId: MEMO_PROGRAM,
+      data: Buffer.from(`VELIXIR:ADD_TOKEN:${mint.toBase58()}`, "utf8"),
+    })
+  );
+
+  const { blockhash } = await c.getLatestBlockhash("confirmed");
+  tx.recentBlockhash = blockhash;
+  tx.feePayer = treasury.publicKey;
+  tx.partialSign(treasury);
 
   const serialized = tx.serialize({ requireAllSignatures: false, verifySignatures: false });
   return { b64: serialized.toString("base64"), treasury: treasury.publicKey.toBase58() };
