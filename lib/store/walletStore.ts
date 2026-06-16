@@ -2,8 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ConnectorType } from '../types/borrow';
 import { toast } from './toastStore';
-import { getProvider, connectWallet, getBalanceSol, requestDevnetAirdrop, shortAddress, clearActiveWallet, type WalletName } from '../wallet';
-import { SOLANA_DEVNET_CONFIG } from '../solana';
+import { getProvider, connectWallet, connectMetaMaskSnap, getBalanceSol, requestDevnetAirdrop, shortAddress, clearActiveWallet, type WalletName } from '../wallet';
 
 // Solana has no numeric chainId like EVM. We keep a sentinel so the existing
 // "wrong network" checks across the UI continue to type-check; the dApp always
@@ -68,88 +67,39 @@ export const useWalletStore = create<WalletState>()(
       connect: async (connector) => {
         set({ connecting: true, modalOpen: false });
 
-        // MetaMask connects to the user's REAL EVM account (no dummy address).
-        // It can't sign Solana natively, so the on-chain flows stay simulated,
-        // but the connected identity is the genuine MetaMask address.
+        // MetaMask signs Solana through the official Solana Snap. Selecting it
+        // opens the MetaMask popup to install/approve the Snap — once approved,
+        // MetaMask holds a REAL Solana account and signs real on-chain txs
+        // (treasury swap/borrow settle for real, just like Phantom/Solflare).
         if (connector === 'MetaMask') {
-          const eth = (typeof window !== 'undefined'
-            ? (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown>; on?: (e: string, cb: (...a: unknown[]) => void) => void; isMetaMask?: boolean } }).ethereum
-            : undefined);
-          if (!eth) {
-            set({ connecting: false });
-            toast.error(
-              'MetaMask not found',
-              'Install the MetaMask extension to connect your account.'
-            );
-            return;
-          }
           try {
-            const accounts = (await eth.request({ method: 'eth_requestAccounts' })) as string[];
-            const addr = accounts?.[0];
-            if (!addr) throw new Error('No MetaMask account authorized.');
-
-            // Immediately prompt MetaMask to add the Solana Devnet RPC network.
-            // (Solana isn't an EVM chain, so MetaMask may not finalize the add —
-            // we surface the prompt as the concept asks and keep the session alive.)
-            try {
-              await eth.request({
-                method: 'wallet_addEthereumChain',
-                params: [
-                  {
-                    chainId: '0x67', // 103 — matches SOLANA_DEVNET_CHAIN_ID sentinel
-                    chainName: 'Solana Devnet',
-                    rpcUrls: [SOLANA_DEVNET_CONFIG.rpcUrl],
-                    nativeCurrency: { name: 'Solana', symbol: 'SOL', decimals: 18 },
-                    blockExplorerUrls: ['https://explorer.solana.com/?cluster=devnet'],
-                  },
-                ],
-              });
-
-              // Switch the active network so the MetaMask extension home lands
-              // directly on Solana Devnet after connecting.
-              try {
-                await eth.request({
-                  method: 'wallet_switchEthereumChain',
-                  params: [{ chainId: '0x67' }],
-                });
-              } catch {
-                /* best effort — newer MetaMask auto-switches after adding */
-              }
-              toast.success('Solana Devnet added', 'MetaMask switched to the Solana Devnet network.');
-            } catch (addErr) {
-              const ae = addErr as { code?: number; message?: string };
-              if (ae?.code === 4001) {
-                toast.info('Network add dismissed', 'You can add Solana Devnet later from MetaMask.');
-              } else {
-                toast.info(
-                  'Solana Devnet RPC prompted',
-                  'MetaMask is an EVM wallet — the session runs on simulated Devnet.'
-                );
-              }
-            }
-
+            toast.info('Enable Solana on MetaMask', 'Approve the Solana Snap install/permission in the MetaMask popup…');
+            const address = await connectMetaMaskSnap();
+            const sol = await getBalanceSol(address);
             set({
               connected: true,
               connecting: false,
-              address: addr,
+              address,
               chainId: SOLANA_DEVNET_CHAIN_ID,
-              balance: '1000.0000',
+              balance: sol.toFixed(4),
               connector,
-              isSimulated: true,
+              isSimulated: false,
             });
-            eth.on?.('accountsChanged', (...args: unknown[]) => {
-              const accs = args[0] as string[] | undefined;
-              if (!accs || accs.length === 0) get().disconnect();
-              else set({ address: accs[0] });
-            });
+            getProvider('MetaMask')?.on?.('disconnect', () => get().disconnect());
             toast.success(
-              'MetaMask connected',
-              `${shortAddress(addr)} • simulated Solana Devnet session (1000 SOL).`
+              'MetaMask connected (Solana Snap)',
+              `${shortAddress(address)} • real Solana Devnet`
             );
+            if (sol === 0) {
+              toast.info('No Devnet SOL', 'Fund this MetaMask Solana account from a faucet to pay fees.');
+            }
           } catch (err) {
-            const e = err as { message?: string };
+            const e = err as { code?: number; message?: string };
             set({ connecting: false });
-            toast.error('Connection failed', e?.message || 'Request rejected in MetaMask.');
+            toast.error(
+              'MetaMask Snap connection failed',
+              e?.message || 'Install MetaMask and approve the Solana Snap to continue.'
+            );
           }
           return;
         }

@@ -54,16 +54,49 @@ declare global {
 }
 
 export type WalletName = "Phantom" | "Solflare";
+// MetaMask signs Solana through the official Solana Snap (not natively), so it's
+// tracked separately from the injected Phantom/Solflare providers.
+type ActiveWallet = WalletName | "MetaMask";
 
 // The wallet the user actually connected with. Every signing path resolves the
 // provider through getProvider() with no argument, so we remember the active
-// wallet here — otherwise, with both extensions installed, signing could be sent
+// wallet here — otherwise, with several wallets installed, signing could be sent
 // to the wrong (unconnected) wallet and no approval popup would appear.
-let activeWalletName: WalletName | null = null;
+let activeWalletName: ActiveWallet | null = null;
+
+// Live MetaMask Solana Snap instance (created on connect). Acts as a Solana
+// provider so the same signing paths work for MetaMask too.
+let metamaskSnap: SolanaProvider | null = null;
+
+/**
+ * Connect MetaMask's Solana Snap and return the base58 public key. Triggers the
+ * MetaMask popup to install/approve the Solana Snap (this is what actually
+ * enables real Solana signing on MetaMask — an EVM "add RPC" prompt cannot).
+ */
+export async function connectMetaMaskSnap(): Promise<string> {
+  if (typeof window === "undefined") throw new Error("MetaMask unavailable.");
+  const mod = await import("@solflare-wallet/metamask-sdk");
+  const SolflareMetaMask = mod.default;
+  const wallet = new SolflareMetaMask({ network: "devnet" });
+  await wallet.connect(); // opens the MetaMask Snap install/approval popup
+  const pubkey = wallet.publicKey?.toString();
+  if (!pubkey) throw new Error("MetaMask Solana Snap did not return an account.");
+  metamaskSnap = wallet as unknown as SolanaProvider;
+  activeWalletName = "MetaMask";
+  return pubkey;
+}
 
 /** Forget the active wallet (call on disconnect). */
 export function clearActiveWallet(): void {
   activeWalletName = null;
+  if (metamaskSnap) {
+    try {
+      metamaskSnap.disconnect();
+    } catch {
+      /* best effort */
+    }
+    metamaskSnap = null;
+  }
 }
 
 /** Human-readable name for whichever provider is active. */
@@ -79,8 +112,10 @@ export function providerName(p: SolanaProvider | null): WalletName | null {
  * (the connector the user picked), then any already-connected provider, then
  * Phantom, then Solflare. Works with both Phantom and Solflare extensions.
  */
-export function getProvider(prefer?: WalletName): SolanaProvider | null {
+export function getProvider(prefer?: ActiveWallet): SolanaProvider | null {
   if (typeof window === "undefined") return null;
+  // MetaMask's Solana account lives in the Snap instance, not on window.
+  if ((prefer ?? activeWalletName) === "MetaMask" && metamaskSnap) return metamaskSnap;
   const phantom = window.phantom?.solana?.isPhantom
     ? window.phantom.solana
     : window.solana?.isPhantom
@@ -99,9 +134,10 @@ export function getProvider(prefer?: WalletName): SolanaProvider | null {
   if (want === "Phantom" && phantom) return phantom;
   if (want === "Solflare" && solflare) return solflare;
   // Prefer one that's already connected (keeps the active session stable).
+  if (metamaskSnap?.isConnected) return metamaskSnap;
   if (phantom?.isConnected) return phantom;
   if (solflare?.isConnected) return solflare;
-  return phantom ?? solflare ?? null;
+  return phantom ?? solflare ?? metamaskSnap ?? null;
 }
 
 /** Wait briefly for a provider to expose its publicKey (Solflare sets it a tick

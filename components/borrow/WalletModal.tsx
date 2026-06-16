@@ -9,7 +9,7 @@ import { ConnectorType } from '@/lib/types/borrow';
 const CONNECTORS: { id: ConnectorType; tag: string; recommended?: boolean }[] = [
   { id: 'Solflare', tag: 'Solana • Real on-chain', recommended: true },
   { id: 'Phantom', tag: 'Solana • Real on-chain' },
-  { id: 'MetaMask', tag: 'EVM + SVM Real on-chain' },
+  { id: 'MetaMask', tag: 'Solana Snap • Real on-chain' },
   { id: 'WalletConnect', tag: 'Dummy • 1000 Devnet SOL' },
 ];
 
