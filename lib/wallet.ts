@@ -75,7 +75,12 @@ export function getProvider(prefer?: WalletName): SolanaProvider | null {
     : window.solana?.isPhantom
     ? window.solana
     : null;
-  const solflare = window.solflare?.isSolflare ? window.solflare : null;
+  // Detect Solflare by its flag, or simply by the injected provider exposing a
+  // connect() — some builds populate `isSolflare` late.
+  const solflare =
+    window.solflare && (window.solflare.isSolflare || typeof window.solflare.connect === "function")
+      ? window.solflare
+      : null;
 
   if (prefer === "Phantom" && phantom) return phantom;
   if (prefer === "Solflare" && solflare) return solflare;
@@ -85,6 +90,29 @@ export function getProvider(prefer?: WalletName): SolanaProvider | null {
   return phantom ?? solflare ?? null;
 }
 
+/** Wait briefly for a provider to expose its publicKey (Solflare sets it a tick
+ *  after connect() resolves). Resolves the base58 key or undefined on timeout. */
+function waitForPublicKey(provider: SolanaProvider, timeoutMs = 8000): Promise<string | undefined> {
+  const immediate = provider.publicKey?.toString();
+  if (immediate) return Promise.resolve(immediate);
+  return new Promise((resolve) => {
+    const start = Date.now();
+    const finish = (v?: string) => {
+      clearInterval(iv);
+      resolve(v);
+    };
+    provider.on?.("connect", () => {
+      const k = provider.publicKey?.toString();
+      if (k) finish(k);
+    });
+    const iv = setInterval(() => {
+      const k = provider.publicKey?.toString();
+      if (k) finish(k);
+      else if (Date.now() - start > timeoutMs) finish(undefined);
+    }, 150);
+  });
+}
+
 /** Connect Phantom/Solflare and return the base58 public key. */
 export async function connectWallet(prefer?: WalletName): Promise<string> {
   const provider = getProvider(prefer);
@@ -92,10 +120,14 @@ export async function connectWallet(prefer?: WalletName): Promise<string> {
     throw new Error("No Solana wallet found. Install Phantom or Solflare to use Solana Devnet.");
   }
   const resp = await provider.connect();
-  // Phantom returns { publicKey }; Solflare resolves void and exposes it on the provider.
-  const pubkey =
-    (resp && "publicKey" in resp ? resp.publicKey?.toString() : undefined) ??
-    provider.publicKey?.toString();
+  // Phantom returns an object { publicKey }; Solflare resolves a boolean and
+  // exposes the key on the provider (guard the `in` check so a boolean response
+  // doesn't throw), sometimes a tick later — so poll for it as a fallback.
+  let pubkey =
+    (resp && typeof resp === "object" && "publicKey" in resp
+      ? (resp as { publicKey?: { toString(): string } }).publicKey?.toString()
+      : undefined) ?? provider.publicKey?.toString();
+  if (!pubkey) pubkey = await waitForPublicKey(provider);
   if (!pubkey) throw new Error("No account authorized.");
   return pubkey;
 }
