@@ -81,7 +81,7 @@ export const MARKET_TOKENS: MarketToken[] = [
     coingeckoId: null,
     color: "#00E5CC",
     colorSecondary: "#00C4AE",
-    price: 0.968, // seed; live price comes from the Raydium USDC/RLO pool
+    price: 1, // RLO is pegged to $1 protocol-wide
     priceChange24h: 0,
     volume24h: 0,
     liquidity: 9_680, // live USDC/RLO pool TVL (4840 USDC + 5000 RLO)
@@ -117,7 +117,7 @@ export function generateSparkline(
 
 export const SPARKLINE_DATA: Record<string, number[]> = {
   sol: generateSparkline(150, 24, 0.012, 602),
-  rialo: generateSparkline(0.968, 24, 0.02, 703),
+  rialo: generateSparkline(1.0, 24, 0.0006, 703),
   usdc: generateSparkline(1.0, 24, 0.0005, 804),
   usdt: generateSparkline(1.0, 24, 0.0006, 805),
 };

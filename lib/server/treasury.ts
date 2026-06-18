@@ -45,10 +45,6 @@ export const TOKENS: Record<string, TokenCfg> = {
   RLO: { symbol: "RLO", mint: new PublicKey("375pbiYRJYS22XuHqAD6KSWQroVnF41ayoLvKtPp4Du6"), decimals: 9, native: false, coingeckoId: null },
 };
 
-// RLO live price source: Raydium USDC/RLO pool vault reserves.
-const RLO_USDC_VAULT = "7NkRCLvggVvTXvRpfJuRVJEY1zV1V9J7g3rLamLMdUhW";
-const RLO_RLO_VAULT = "4gYx6tTudiEw7Wvf4CtvGuF3iaZ8uAJVYhcXyGWBTD99";
-
 let _conn: Connection | null = null;
 export function conn(): Connection {
   if (!_conn) _conn = new Connection(RPC_URL, "confirmed");
@@ -71,18 +67,7 @@ export function loadTreasury(): Keypair | null {
   }
 }
 
-async function rpc(method: string, params: unknown[]): Promise<unknown> {
-  const res = await fetch(RPC_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    cache: "no-store",
-    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
-  });
-  const json = await res.json();
-  return json?.result;
-}
-
-/** Live USD prices for SOL/USDC/USDT (CoinGecko) and RLO (Raydium reserves). */
+/** Live USD prices for SOL/USDC/USDT (CoinGecko). RLO is pegged to $1. */
 export async function getPrices(): Promise<Record<string, number>> {
   const prices: Record<string, number> = { USDC: 1, USDT: 1 };
   try {
@@ -100,21 +85,8 @@ export async function getPrices(): Promise<Record<string, number>> {
     /* defaults below */
   }
   if (!prices.SOL) prices.SOL = 150;
-  try {
-    const result = (await rpc("getMultipleAccounts", [
-      [RLO_USDC_VAULT, RLO_RLO_VAULT],
-      { encoding: "jsonParsed" },
-    ])) as { value?: Array<{ data?: { parsed?: { info?: { tokenAmount?: { uiAmount?: number } } } } }> } | null;
-    const accts = result?.value;
-    const usdc = accts?.[0]?.data?.parsed?.info?.tokenAmount?.uiAmount;
-    const rlo = accts?.[1]?.data?.parsed?.info?.tokenAmount?.uiAmount;
-    if (typeof usdc === "number" && typeof rlo === "number" && rlo > 0) {
-      prices.RLO = (usdc / rlo) * (prices.USDC || 1);
-    }
-  } catch {
-    /* leave RLO undefined */
-  }
-  if (!prices.RLO) prices.RLO = 0.968;
+  // RLO is pegged to $1 protocol-wide so swap output amounts match the UI.
+  prices.RLO = 1;
   return prices;
 }
 

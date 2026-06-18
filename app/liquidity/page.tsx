@@ -48,7 +48,7 @@ export default function LiquidityPage() {
 
   const [lending, setLending] = useState<LendingPoolInfo[]>([]);
   const [amm, setAmm] = useState<AmmPoolInfo | null>({
-    price: 0.968,
+    price: 1,
     usdcReserve: 250000,
     rloReserve: 258264,
     poolId: RLO_POOL.poolId,

@@ -59,7 +59,7 @@ export default function PortfolioSection() {
   const collateralAssets = useMemo(() => [
     { id: "sol", symbol: "SOL", name: "Solana", price: priceOf("SOL", 152.4), icon: "sol", standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.035 },
     { id: "btc", symbol: "BTC", name: "Bitcoin", price: priceOf("BTC", 95000), icon: "btc", standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.012 },
-    { id: "rialo", symbol: "RLO", name: "Rialo", price: priceOf("RLO", 0.968), icon: "rialo", standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.145 },
+    { id: "rialo", symbol: "RLO", name: "Rialo", price: priceOf("RLO", 1), icon: "rialo", standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.145 },
     { id: "usdc_col", symbol: "USDC", name: "USD Coin", price: priceOf("USDC", 1.00), icon: "usdc", standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.048 },
   ], [prices]);
 

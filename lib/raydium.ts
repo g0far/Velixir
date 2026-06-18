@@ -57,7 +57,8 @@ export async function fetchRloPoolState(): Promise<RloPoolState | null> {
     if (typeof usdcReserve !== "number" || typeof rloReserve !== "number" || rloReserve <= 0) {
       return null;
     }
-    return { price: usdcReserve / rloReserve, usdcReserve, rloReserve };
+    // RLO is pegged to $1 protocol-wide; reserves stay real for TVL display.
+    return { price: 1, usdcReserve, rloReserve };
   } catch {
     return null;
   }

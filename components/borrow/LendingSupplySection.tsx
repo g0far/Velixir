@@ -128,7 +128,7 @@ export default function LendingSupplySection() {
   }, []);
 
   const priceOf = (symbol: string, fallback: number) => prices[symbol]?.price ?? fallback;
-  const FALLBACK: Record<string, number> = { SOL: 152.4, BTC: 95000, RLO: 0.968, USDC: 1, USDT: 1 };
+  const FALLBACK: Record<string, number> = { SOL: 152.4, BTC: 95000, RLO: 1, USDC: 1, USDT: 1 };
 
   const myDeposits = useMemo(
     () => (address ? positions[address.toLowerCase()] || [] : []),

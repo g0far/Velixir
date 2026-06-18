@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { OraclePrice } from '../types/borrow';
 import { toast } from './toastStore';
-import { fetchRloPoolState } from '../raydium';
 
 // Seed prices are only a brief placeholder shown before the first live fetch
 // (and a last-resort offline fallback). They are kept close to recent reality
@@ -10,7 +9,7 @@ import { fetchRloPoolState } from '../raydium';
 const SEED: Record<string, number> = {
   SOL: 150,
   BTC: 63000,
-  RLO: 0.968, // live price comes from the Raydium USDC/RLO pool reserves
+  RLO: 1.0, // RLO is pegged to $1 across the protocol (UI, swaps, lending)
   USDC: 1.0,
   USDT: 1.0,
 };
@@ -84,14 +83,10 @@ export const useOracleStore = create<OracleState>((set, get) => ({
     // Live USD prices (SOL, BTC, USDC, USDT) from the same-origin proxy.
     const { prices: live, changes } = await fetchLivePrices();
 
-    // RLO live price from the on-chain Raydium USDC/RLO pool reserves.
-    const rloPool = await fetchRloPoolState();
-    const rloPrice = rloPool ? rloPool.price : null;
-
     const onChainPrices: Record<string, number | null> = {
       SOL: live.SOL ?? null,
       BTC: live.BTC ?? null,
-      RLO: rloPrice, // live from Raydium pool; null → hold last-known
+      RLO: 1.0, // RLO is pegged to $1 protocol-wide
       USDC: live.USDC ?? 1.0,
       USDT: live.USDT ?? 1.0,
     };
