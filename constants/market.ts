@@ -6,7 +6,7 @@ const ALCHEMY_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || "";
 export const SOLANA_DEVNET_CONFIG = {
   cluster: "devnet" as const,
   chainName: "Solana Devnet",
-  explorerUrl: "https://explorer.solana.com",
+  explorerUrl: "https://solscan.io",
   apiKey: ALCHEMY_KEY,
   rpcUrl: ALCHEMY_KEY
     ? `https://solana-devnet.g.alchemy.com/v2/${ALCHEMY_KEY}`

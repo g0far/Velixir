@@ -286,7 +286,7 @@ export default function BorrowPage() {
         toast.info('Transaction submitted', 'Waiting for Devnet confirmation…');
         const { status } = await waitForReceipt(sig);
         if (status === 'success') {
-          toast.success('On-chain confirmed', `View on Solana Explorer: ${explorerTxUrl(sig)}`);
+          toast.success('On-chain confirmed', `View on Solscan: ${explorerTxUrl(sig)}`);
           return { ok: true, signature: sig };
         }
         toast.error('Transaction failed', 'The Devnet transaction did not confirm.');
@@ -310,7 +310,7 @@ export default function BorrowPage() {
       try {
         toast.info('Confirm in wallet', 'Sign the transaction on Solana Devnet…');
         const sig = await executeTreasuryBorrow(req);
-        toast.success('On-chain confirmed', `View on Solana Explorer: ${explorerTxUrl(sig)}`);
+        toast.success('On-chain confirmed', `View on Solscan: ${explorerTxUrl(sig)}`);
         useBalanceStore.getState().refresh();
         useBalanceStore.getState().refreshSoon();
         return { ok: true, signature: sig };

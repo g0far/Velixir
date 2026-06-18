@@ -19,7 +19,7 @@ const ALCHEMY_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || "";
 export const SOLANA_DEVNET_CONFIG = {
   cluster: "devnet" as const,
   chainName: "Solana Devnet",
-  explorerUrl: "https://explorer.solana.com",
+  explorerUrl: "https://solscan.io",
   // Alchemy Solana Devnet RPC when a key is configured; otherwise public devnet.
   rpcUrl: ALCHEMY_KEY
     ? `https://solana-devnet.g.alchemy.com/v2/${ALCHEMY_KEY}`
@@ -41,14 +41,14 @@ export function getConnection(): Connection {
   return _connection;
 }
 
-/** Solana Explorer link for a transaction signature on devnet. */
+/** Solscan link for a transaction signature on devnet. */
 export function explorerTxUrl(signature: string): string {
   return `${SOLANA_DEVNET_CONFIG.explorerUrl}/tx/${signature}?cluster=devnet`;
 }
 
-/** Solana Explorer link for an account address on devnet. */
+/** Solscan link for an account address on devnet. */
 export function explorerAddrUrl(address: string): string {
-  return `${SOLANA_DEVNET_CONFIG.explorerUrl}/address/${address}?cluster=devnet`;
+  return `${SOLANA_DEVNET_CONFIG.explorerUrl}/account/${address}?cluster=devnet`;
 }
 
 /** Truncate a base58 Solana address for display (e.g. 7xKX… y9mP). */

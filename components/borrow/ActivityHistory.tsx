@@ -11,6 +11,7 @@ import {
   RefreshCw,
   ExternalLink
 } from 'lucide-react';
+import { explorerTxUrl } from '@/lib/wallet';
 import { useHistoryStore } from '@/lib/store/historyStore';
 import { useTrustStore } from '@/lib/store/trustStore';
 import { useSwapHistoryStore } from '@/lib/store/swapHistoryStore';
@@ -240,7 +241,7 @@ export default function ActivityHistory() {
                     <p className="text-xs font-semibold text-white">{tx.action}</p>
                     {tx.signature ? (
                       <a
-                        href={`https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`}
+                        href={explorerTxUrl(tx.signature)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-[10px] font-mono text-emerald-400/80 hover:text-emerald-300 flex items-center gap-1 transition-colors"
