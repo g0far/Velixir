@@ -28,11 +28,15 @@ export interface LendingPool {
   seedBorrowedUSD: number; // seed liquidity already borrowed (USD)
 }
 
+// Pool TVL shown on the Liquidity page = seedSuppliedUSD − seedBorrowedUSD, and
+// the per-pool "Liquidity" token amount = TVL / price (auto-adjusts to the TVL).
+// Seeds are sized to the target Pool TVLs (RLO $50k, USDC $30k, USDT $25k,
+// SOL $40k) while keeping realistic utilization so APY/utilization stay sensible.
 export const LENDING_POOLS: LendingPool[] = [
-  { symbol: 'RLO',  label: 'RIALO', risk: 'Medium', base: 0.020, slope1: 0.18, slope2: 2.50, optimalU: 0.75, reserve: 0.10, trustPremium: 0.080, seedSuppliedUSD: 420_000,   seedBorrowedUSD: 184_800 },
-  { symbol: 'USDC', label: 'USDC',  risk: 'Low',    base: 0.005, slope1: 0.14, slope2: 0.90, optimalU: 0.90, reserve: 0.10, trustPremium: 0.025, seedSuppliedUSD: 2_400_000, seedBorrowedUSD: 1_872_000 },
-  { symbol: 'USDT', label: 'USDT',  risk: 'Low',    base: 0.005, slope1: 0.14, slope2: 0.90, optimalU: 0.90, reserve: 0.10, trustPremium: 0.025, seedSuppliedUSD: 1_800_000, seedBorrowedUSD: 1_278_000 },
-  { symbol: 'SOL',  label: 'SOL',   risk: 'Medium', base: 0.010, slope1: 0.10, slope2: 1.20, optimalU: 0.80, reserve: 0.15, trustPremium: 0.020, seedSuppliedUSD: 1_100_000, seedBorrowedUSD: 682_000 },
+  { symbol: 'RLO',  label: 'RIALO', risk: 'Medium', base: 0.020, slope1: 0.18, slope2: 2.50, optimalU: 0.75, reserve: 0.10, trustPremium: 0.080, seedSuppliedUSD: 90_000,  seedBorrowedUSD: 40_000 },
+  { symbol: 'USDC', label: 'USDC',  risk: 'Low',    base: 0.005, slope1: 0.14, slope2: 0.90, optimalU: 0.90, reserve: 0.10, trustPremium: 0.025, seedSuppliedUSD: 135_000, seedBorrowedUSD: 105_000 },
+  { symbol: 'USDT', label: 'USDT',  risk: 'Low',    base: 0.005, slope1: 0.14, slope2: 0.90, optimalU: 0.90, reserve: 0.10, trustPremium: 0.025, seedSuppliedUSD: 85_000,  seedBorrowedUSD: 60_000 },
+  { symbol: 'SOL',  label: 'SOL',   risk: 'Medium', base: 0.010, slope1: 0.10, slope2: 1.20, optimalU: 0.80, reserve: 0.15, trustPremium: 0.020, seedSuppliedUSD: 105_000, seedBorrowedUSD: 65_000 },
 ];
 
 export const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;
