@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import VelixirFooter from "@/components/main/VelixirFooter";
-import ImportTokens from "@/components/main/ImportTokens";
 import { LENDING_POOLS, useLendingStore, computeSupplyAPY } from "@/lib/store/lendingStore";
 import { useWalletStore } from "@/lib/store/walletStore";
 import { CryptoIcon } from "@/components/borrow/LendingSupplySection";
@@ -591,9 +590,6 @@ export default function LiquidityPage() {
               </motion.div>
             ))}
           </div>
-
-          {/* Add tokens to wallet */}
-          <ImportTokens />
 
           {/* Lending Pools */}
           <section className="space-y-3">

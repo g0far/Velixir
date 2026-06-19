@@ -346,6 +346,50 @@ export async function addTokenToWallet(symbol: string, mint: string): Promise<Ad
   return { signature, amount: 0 };
 }
 
+export interface ClaimFaucetResult {
+  signature: string;
+  claimed: { symbol: string; amount: number }[];
+}
+
+/**
+ * One-click faucet: asks the server for a treasury-sponsored transaction that
+ * funds the connected wallet with 1 SOL + 2000 USDC + 2000 USDT + 2000 RLO, then
+ * signs it (single wallet popup) and submits. The treasury pays all fees/rent.
+ * Returns null when the wallet already holds every faucet asset.
+ */
+export async function claimFaucet(): Promise<ClaimFaucetResult | null> {
+  const provider = getProvider();
+  if (!provider?.signTransaction) throw new Error("Connect a Solana wallet first.");
+  const ownerStr = provider.publicKey?.toString();
+  if (!ownerStr) throw new Error("Connect a Solana wallet first.");
+  const conn = getConnection();
+
+  const res = await fetch("/api/claim-faucet", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user: ownerStr }),
+  });
+  if (!res.ok) {
+    const j = await res.json().catch(() => ({}));
+    throw new Error(j?.error || `Claim failed (${res.status}).`);
+  }
+  const j = (await res.json()) as {
+    tx?: string;
+    alreadyClaimed?: boolean;
+    claimed?: { symbol: string; amount: number }[];
+  };
+  if (j.alreadyClaimed || !j.tx) return null;
+
+  const signed = await provider.signTransaction(Transaction.from(Buffer.from(j.tx, "base64")));
+  const sig = await conn.sendRawTransaction(signed.serialize(), {
+    skipPreflight: false,
+    preflightCommitment: "confirmed",
+    maxRetries: 5,
+  });
+  await waitForReceipt(sig);
+  return { signature: sig, claimed: j.claimed ?? [] };
+}
+
 /** Poll the devnet for confirmation so the UI can flip pending → confirmed. */
 export async function waitForReceipt(
   signature: string,

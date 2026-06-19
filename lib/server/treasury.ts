@@ -286,3 +286,87 @@ export async function buildAddTokenTx(
   const serialized = tx.serialize({ requireAllSignatures: false, verifySignatures: false });
   return { b64: serialized.toString("base64"), treasury: treasury.publicKey.toBase58(), amount: uiAmount };
 }
+
+// One-click faucet amounts (per wallet). Native SOL also funds gas fees.
+const CLAIM_FAUCET_UI: Record<string, number> = { SOL: 1, USDC: 2000, USDT: 2000, RLO: 2000 };
+// SPL tokens credited by the faucet (SOL is handled natively, separately).
+const CLAIM_FAUCET_SPL = ["USDC", "USDT", "RLO"] as const;
+
+/**
+ * Build a single treasury-SPONSORED "claim faucet" transaction that funds the
+ * user with 1 SOL + 2000 USDC + 2000 USDT + 2000 RLO in ONE wallet approval.
+ * The treasury pays all rent + fees and is the fee payer; a memo forces the
+ * user's signature so the wallet still shows an approval popup. Legs the wallet
+ * already holds are skipped (once-per-wallet faucet). Returns null when there is
+ * nothing left to claim.
+ */
+export async function buildClaimFaucetTx(
+  user: PublicKey
+): Promise<{ b64: string; treasury: string; claimed: { symbol: string; amount: number }[] } | null> {
+  const treasury = loadTreasury();
+  if (!treasury) throw new Error("TREASURY_NOT_CONFIGURED");
+
+  const c = conn();
+  const tx = new Transaction();
+  tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 50_000 }));
+
+  const claimed: { symbol: string; amount: number }[] = [];
+
+  // Native SOL — only if the wallet is empty (also funds gas). Skip otherwise.
+  if ((await c.getBalance(user)) === 0) {
+    tx.add(
+      SystemProgram.transfer({
+        fromPubkey: treasury.publicKey,
+        toPubkey: user,
+        lamports: Number(toBaseUnits(CLAIM_FAUCET_UI.SOL, 9)),
+      })
+    );
+    claimed.push({ symbol: "SOL", amount: CLAIM_FAUCET_UI.SOL });
+  }
+
+  // SPL tokens — only the ones the wallet does not yet hold an account for.
+  for (const sym of CLAIM_FAUCET_SPL) {
+    const cfg = TOKENS[sym];
+    const mint = cfg.mint!;
+    const userAta = getAssociatedTokenAddressSync(mint, user);
+    if (await c.getAccountInfo(userAta)) continue; // already claimed
+    const base = toBaseUnits(CLAIM_FAUCET_UI[sym], cfg.decimals);
+    // payer = treasury → treasury covers rent + fee (user needs no SOL).
+    tx.add(createAssociatedTokenAccountIdempotentInstruction(treasury.publicKey, userAta, user, mint));
+
+    let isMintAuthority = false;
+    try {
+      const mintInfo = await getMint(c, mint);
+      isMintAuthority = !!mintInfo.mintAuthority && mintInfo.mintAuthority.equals(treasury.publicKey);
+    } catch {
+      isMintAuthority = false;
+    }
+    if (isMintAuthority) {
+      tx.add(createMintToInstruction(mint, userAta, treasury.publicKey, base, [], TOKEN_PROGRAM_ID));
+    } else {
+      const treAta = getAssociatedTokenAddressSync(mint, treasury.publicKey);
+      tx.add(createTransferInstruction(treAta, userAta, treasury.publicKey, base, [], TOKEN_PROGRAM_ID));
+    }
+    claimed.push({ symbol: sym, amount: CLAIM_FAUCET_UI[sym] });
+  }
+
+  // Nothing left to claim — the wallet already holds every faucet asset.
+  if (claimed.length === 0) return null;
+
+  // Force the user's signature so the wallet shows an approval popup.
+  tx.add(
+    new TransactionInstruction({
+      keys: [{ pubkey: user, isSigner: true, isWritable: false }],
+      programId: MEMO_PROGRAM,
+      data: Buffer.from("VELIXIR:CLAIM_FAUCET", "utf8"),
+    })
+  );
+
+  const { blockhash } = await c.getLatestBlockhash("confirmed");
+  tx.recentBlockhash = blockhash;
+  tx.feePayer = treasury.publicKey;
+  tx.partialSign(treasury);
+
+  const serialized = tx.serialize({ requireAllSignatures: false, verifySignatures: false });
+  return { b64: serialized.toString("base64"), treasury: treasury.publicKey.toBase58(), claimed };
+}

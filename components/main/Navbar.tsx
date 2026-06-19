@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { useWalletStore } from "@/lib/store/walletStore";
 import WalletModal from "@/components/borrow/WalletModal";
 import Toaster from "@/components/borrow/Toaster";
+import ClaimFaucet from "@/components/main/ClaimFaucet";
 import { Loader2, CheckCircle, ChevronDown, LogOut, Menu, X } from "lucide-react";
 
 const TABS = [
@@ -256,6 +257,9 @@ const Navbar = () => {
                     >
                         {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                     </button>
+
+                    {/* One-click treasury faucet — sits to the left of the wallet button */}
+                    {mounted && <ClaimFaucet />}
 
                     {!mounted ? (
                         <button 
