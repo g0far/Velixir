@@ -296,9 +296,11 @@ const CLAIM_FAUCET_SPL = ["USDC", "USDT", "RLO"] as const;
  * Build a single treasury-SPONSORED "claim faucet" transaction that funds the
  * user with 1 SOL + 2000 USDC + 2000 USDT + 2000 RLO in ONE wallet approval.
  * The treasury pays all rent + fees and is the fee payer; a memo forces the
- * user's signature so the wallet still shows an approval popup. Legs the wallet
- * already holds are skipped (once-per-wallet faucet). Returns null when there is
- * nothing left to claim.
+ * user's signature so the wallet still shows an approval popup.
+ *
+ * Strictly ONCE PER WALLET: the first claim creates and credits the user's RLO
+ * token account, so the presence of that account is the on-chain "already
+ * claimed" marker — any later claim from the same address returns null (blocked).
  */
 export async function buildClaimFaucetTx(
   user: PublicKey
@@ -307,29 +309,33 @@ export async function buildClaimFaucetTx(
   if (!treasury) throw new Error("TREASURY_NOT_CONFIGURED");
 
   const c = conn();
+
+  // Once-per-wallet gate: the RLO token account is created + credited on the
+  // first claim, so if it already exists this wallet has already claimed.
+  const rloMint = TOKENS.RLO.mint!;
+  const rloUserAta = getAssociatedTokenAddressSync(rloMint, user);
+  if (await c.getAccountInfo(rloUserAta)) return null; // already claimed — blocked
+
   const tx = new Transaction();
   tx.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 50_000 }));
 
   const claimed: { symbol: string; amount: number }[] = [];
 
-  // Native SOL — only if the wallet is empty (also funds gas). Skip otherwise.
-  if ((await c.getBalance(user)) === 0) {
-    tx.add(
-      SystemProgram.transfer({
-        fromPubkey: treasury.publicKey,
-        toPubkey: user,
-        lamports: Number(toBaseUnits(CLAIM_FAUCET_UI.SOL, 9)),
-      })
-    );
-    claimed.push({ symbol: "SOL", amount: CLAIM_FAUCET_UI.SOL });
-  }
+  // Native SOL — funds gas + balance (also granted on the single claim).
+  tx.add(
+    SystemProgram.transfer({
+      fromPubkey: treasury.publicKey,
+      toPubkey: user,
+      lamports: Number(toBaseUnits(CLAIM_FAUCET_UI.SOL, 9)),
+    })
+  );
+  claimed.push({ symbol: "SOL", amount: CLAIM_FAUCET_UI.SOL });
 
-  // SPL tokens — only the ones the wallet does not yet hold an account for.
+  // SPL tokens — created (idempotent) and credited in the same atomic tx.
   for (const sym of CLAIM_FAUCET_SPL) {
     const cfg = TOKENS[sym];
     const mint = cfg.mint!;
     const userAta = getAssociatedTokenAddressSync(mint, user);
-    if (await c.getAccountInfo(userAta)) continue; // already claimed
     const base = toBaseUnits(CLAIM_FAUCET_UI[sym], cfg.decimals);
     // payer = treasury → treasury covers rent + fee (user needs no SOL).
     tx.add(createAssociatedTokenAccountIdempotentInstruction(treasury.publicKey, userAta, user, mint));
@@ -349,9 +355,6 @@ export async function buildClaimFaucetTx(
     }
     claimed.push({ symbol: sym, amount: CLAIM_FAUCET_UI[sym] });
   }
-
-  // Nothing left to claim — the wallet already holds every faucet asset.
-  if (claimed.length === 0) return null;
 
   // Force the user's signature so the wallet shows an approval popup.
   tx.add(

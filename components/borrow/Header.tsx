@@ -5,6 +5,7 @@ import { useWalletStore, BASE_SEPOLIA_CHAIN_ID } from '@/lib/store/walletStore';
 import { useHistoryStore } from '@/lib/store/historyStore';
 import { useTrustStore, selectTrustScore, getReputationTierName } from '@/lib/store/trustStore';
 import { useReputationStore } from '@/lib/store/reputationStore';
+import ClaimFaucet from '@/components/main/ClaimFaucet';
 
 interface HeaderProps {
   activeTab: string;
@@ -216,6 +217,9 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
                 )}
               </AnimatePresence>
             </div>
+
+            {/* One-click treasury faucet — sits to the left of the wallet button */}
+            <ClaimFaucet />
 
             {/* Wallet Connect */}
             <div className="relative">

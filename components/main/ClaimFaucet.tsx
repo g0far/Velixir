@@ -58,13 +58,13 @@ export default function ClaimFaucet() {
     <button
       onClick={handleClaim}
       disabled={claiming}
-      title="Claim 1 SOL + 2000 USDC + 2000 USDT + 2000 RLO from the treasury"
-      className="group flex items-center gap-2 cursor-pointer bg-black/30 border border-cyan-500/40 px-[16px] md:px-[20px] py-[8px] rounded-full text-cyan-300 hover:bg-cyan-500/20 hover:text-white transition-all shadow-[0_0_10px_rgba(6,182,212,0.15)] hover:shadow-[0_0_20px_rgba(6,182,212,0.35)] font-bold text-sm md:text-base disabled:opacity-60 disabled:cursor-not-allowed"
+      title="Claim 1 SOL + 2000 USDC + 2000 USDT + 2000 RLO from the treasury (once per wallet)"
+      className="group flex items-center gap-1.5 cursor-pointer bg-black/30 border border-cyan-500/40 px-3 py-1.5 rounded-full text-cyan-300 hover:bg-cyan-500/20 hover:text-white transition-all shadow-[0_0_8px_rgba(6,182,212,0.12)] hover:shadow-[0_0_16px_rgba(6,182,212,0.3)] font-bold text-xs disabled:opacity-60 disabled:cursor-not-allowed"
     >
       {claiming ? (
-        <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
       ) : (
-        <Droplets className="w-4 h-4 md:w-5 md:h-5" />
+        <Droplets className="w-3.5 h-3.5" />
       )}
       <span className="hidden sm:inline">{claiming ? "CLAIMING..." : "CLAIM FAUCET"}</span>
     </button>
