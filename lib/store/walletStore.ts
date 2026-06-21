@@ -85,7 +85,9 @@ export const useWalletStore = create<WalletState>()(
               connector,
               isSimulated: false,
             });
-            getProvider('MetaMask')?.on?.('disconnect', () => get().disconnect());
+            const metaMaskProvider = getProvider('MetaMask');
+            metaMaskProvider?.removeAllListeners?.('disconnect');
+            metaMaskProvider?.on?.('disconnect', () => get().disconnect());
             toast.success(
               'MetaMask connected (Solana Snap)',
               `${shortAddress(address)} • real Solana Devnet`
@@ -164,6 +166,7 @@ export const useWalletStore = create<WalletState>()(
 
           // Keep state in sync with Phantom.
           provider.removeAllListeners?.('accountChanged');
+          provider.removeAllListeners?.('disconnect');
           provider.on?.('accountChanged', (pk: unknown) => {
             const key = (pk as { toString(): string } | null)?.toString();
             if (!key) get().disconnect();
@@ -221,12 +224,12 @@ export const useWalletStore = create<WalletState>()(
       },
 
       disconnect: () => {
-        try {
-          getProvider()?.disconnect();
-        } catch {
-          /* best effort */
-        }
-        clearActiveWallet();
+        if (!get().connected) return;
+
+        const provider = getProvider();
+
+        // Set connected: false first to prevent recursive/redundant disconnect calls
+        // from any provider events triggered during the teardown.
         set({
           connected: false,
           address: '',
@@ -235,6 +238,14 @@ export const useWalletStore = create<WalletState>()(
           connector: null,
           isSimulated: false,
         });
+
+        try {
+          provider?.disconnect();
+        } catch {
+          /* best effort */
+        }
+        clearActiveWallet();
+
         toast.info('Wallet disconnected');
       },
     }),

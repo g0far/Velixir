@@ -61,20 +61,14 @@ export default function BorrowPage() {
       if (typeof window !== 'undefined') {
         const params = new URLSearchParams(window.location.search);
         const tab = params.get('tab');
-        const mode = params.get('mode');
 
         if (tab) {
           setActiveNavigation(tab);
         }
-        if (mode === 'lending') {
-          useTrustStore.getState().setReputationMode(false);
-        } else if (mode === 'borrow') {
-          useTrustStore.getState().setReputationMode(true);
-        }
 
         // Clear query params from URL after applying them once,
         // so navigation is not locked on subsequent clicks.
-        if (tab || mode) {
+        if (tab) {
           window.history.replaceState({}, '', window.location.pathname);
         }
       }
@@ -82,6 +76,9 @@ export default function BorrowPage() {
 
     // Run initially
     handleLocationChange();
+
+    // Force borrow mode on this page
+    useTrustStore.getState().setReputationMode(true);
 
     // Listen for back/forward navigation
     window.addEventListener('popstate', handleLocationChange);
@@ -93,7 +90,7 @@ export default function BorrowPage() {
 
   const handleSplashFinish = useCallback(() => setShowSplash(false), []);
 
-  const [activeNavigation, setActiveNavigation] = useState('Lending&Borrow');
+  const [activeNavigation, setActiveNavigation] = useState('Borrow');
 
   // ---- Trust Credentials Engine (persisted) ----
   const credentials = useTrustStore((s) => s.credentials);
@@ -442,7 +439,7 @@ export default function BorrowPage() {
         <Header activeTab={activeNavigation} setActiveTab={setActiveNavigation} />
 
       {/* Main Page Area */}
-      {activeNavigation === 'Home' || activeNavigation === 'Lending&Borrow' ? (
+      {activeNavigation === 'Home' || activeNavigation === 'Borrow' ? (
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-5">
           {/* Hero Banner Section */}
           <div className="relative rounded-3xl bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-violet-950/40 via-slate-900 to-slate-950 border border-white/5 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 overflow-hidden">
@@ -450,36 +447,20 @@ export default function BorrowPage() {
             <div className="absolute bottom-0 left-10 h-[150px] w-[200px] bg-violet-600/5 rounded-full blur-[80px] pointer-events-none"></div>
 
             <div className="space-y-2 max-w-2xl">
-              {isReputationMode ? (
-                <>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-violet-500/10 text-indigo-400 border border-indigo-500/20 shadow-sm animate-pulse">
-                    Under-Collateralized Lending
-                  </span>
-                  <h1 className="font-display text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-                    Borrow With Reputation Power
-                  </h1>
-                  <p className="text-sm text-slate-400 leading-relaxed max-w-xl">
-                    DeFi credit lines designed around decentralized reputation, trust certificates, and verifiable credentials. Reduce collateral requirements and unlock greater capital efficiency through verified trust.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm animate-pulse">
-                    Velixir Lending Protocol
-                  </span>
-                  <h1 className="font-display text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-                    Lend Assets, Earn Yield
-                  </h1>
-                  <p className="text-sm text-slate-400 leading-relaxed max-w-xl">
-                    Supply your crypto assets to Velixir liquidity pools and earn competitive on-chain yield. Your funds fuel under-collateralized loans issued to reputation-verified borrowers — fully non-custodial, transparent, and secured by Solana smart contracts.
-                  </p>
-                </>
-              )}
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-violet-500/10 text-indigo-400 border border-indigo-500/20 shadow-sm animate-pulse">
+                Under-Collateralized Lending
+              </span>
+              <h1 className="font-display text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+                Borrow With Reputation Power
+              </h1>
+              <p className="text-sm text-slate-400 leading-relaxed max-w-xl">
+                DeFi credit lines designed around decentralized reputation, trust certificates, and verifiable credentials. Reduce collateral requirements and unlock greater capital efficiency through verified trust.
+              </p>
             </div>
 
-            {/* Reputation Segment Switcher + Tier badge */}
+            {/* Tier badge */}
             <div className="flex flex-col items-end gap-3 w-full md:w-auto">
-              {isReputationMode && currentTier && (
+              {currentTier && (
                 <div className={`w-full md:w-auto flex items-center gap-3 px-4 py-2.5 rounded-xl border ${currentTier.color.bg} ${currentTier.color.border}`}>
                   <div className="flex items-center gap-2">
                     <TrustTierBadge trustScore={trustScore} size="lg" />
@@ -500,37 +481,6 @@ export default function BorrowPage() {
                   </div>
                 </div>
               )}
-              <div className="bg-slate-950 p-1.5 rounded-2xl border border-white/5 flex gap-2 w-full">
-                <button
-                  onClick={() => setReputationMode(false)}
-                  className={`flex-1 px-4 py-2.5 rounded-xl text-center text-xs font-semibold cursor-pointer transition-all flex items-center justify-center gap-2 ${
-                    !isReputationMode
-                      ? 'bg-gradient-to-r from-emerald-600/30 to-teal-600/30 text-emerald-300 border border-emerald-500/30 shadow-lg shadow-emerald-900/30'
-                      : 'text-slate-500 hover:text-slate-300'
-                  }`}
-                >
-                  {!isReputationMode && (
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-                    </span>
-                  )}
-                  Lending
-                </button>
-                <button
-                  onClick={() => setReputationMode(true)}
-                  className={`flex-1 px-4 py-2.5 rounded-xl text-center text-xs font-semibold cursor-pointer transition-all flex items-center justify-center gap-1 ${
-                    isReputationMode
-                      ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-600/15'
-                      : 'text-slate-400 hover:text-slate-300'
-                  }`}
-                >
-                  Reputation Borrow
-                  <span className="text-[8px] tracking-wide font-mono px-1 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/20 uppercase font-black ml-1">
-                    Trust
-                  </span>
-                </button>
-              </div>
             </div>
           </div>          {/* Wrong Network Warning Banner */}
           {wrongNetwork && (
@@ -552,172 +502,89 @@ export default function BorrowPage() {
           )}
 
           {/* Metrics Panel Row — only on Reputation Borrow tab */}
-          {isReputationMode && (
-            <Metrics
-              score={trustScore}
-              borrowPower={Math.round(computeMaxBorrowLTV(trustScore) * 100)}
-              credentials={credentials}
-              activeReductionSum={activeReductionSum}
-              trustStrength={Math.min(100, Math.round(60 + (activeReductionSum / 0.30) * 40))}
-            />
-          )}
+          <Metrics
+            score={trustScore}
+            borrowPower={Math.round(computeMaxBorrowLTV(trustScore) * 100)}
+            credentials={credentials}
+            activeReductionSum={activeReductionSum}
+            trustStrength={Math.min(100, Math.round(60 + (activeReductionSum / 0.30) * 40))}
+          />
 
-          {/* Two-Column Work Grid or Centened Single Panel */}
-          {isReputationMode ? (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              <div className="lg:col-span-8 space-y-4">
-                <TrustBuilder
-                  credentials={credentials}
-                  onToggle={handleToggleCredential}
-                  totalReduction={engine.reduction}
-                  collateralSaved={collateralSaved}
-                  collateralRatio={collateralRatioPercent}
-                  connected={connected}
-                  trustScore={trustScore}
-                  wrongNetwork={wrongNetwork}
-                />
+          {/* Two-Column Work Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="lg:col-span-8 space-y-4">
+              <TrustBuilder
+                credentials={credentials}
+                onToggle={handleToggleCredential}
+                totalReduction={engine.reduction}
+                collateralSaved={collateralSaved}
+                collateralRatio={collateralRatioPercent}
+                connected={connected}
+                trustScore={trustScore}
+                wrongNetwork={wrongNetwork}
+              />
 
-                <ReputationEngineFormula
-                  collateralValue={totalCollateralValuation}
-                  score={trustScore}
-                  isReputationMode={isReputationMode}
-                  totalReduction={engine.reduction}
-                />
+              <ReputationEngineFormula
+                collateralValue={totalCollateralValuation}
+                score={trustScore}
+                isReputationMode={isReputationMode}
+                totalReduction={engine.reduction}
+              />
 
-                <RequiredCollateralSummary
-                  standardCollateralNeeded={standardCollateralNeeded}
-                  reputationCollateralNeeded={reputationCollateralNeeded}
-                  collateralSaved={collateralSaved}
-                  collateralAsset={activeCollateral}
-                  collateralPrice={collateralPrice}
-                  isReputationMode={isReputationMode}
-                />
+              <RequiredCollateralSummary
+                standardCollateralNeeded={standardCollateralNeeded}
+                reputationCollateralNeeded={reputationCollateralNeeded}
+                collateralSaved={collateralSaved}
+                collateralAsset={activeCollateral}
+                collateralPrice={collateralPrice}
+                isReputationMode={isReputationMode}
+              />
 
-                <BorrowHealthMonitor
-                  collateralValue={totalCollateralValuation}
-                  debtValue={Number(borrowAmount) || 0}
-                  accruedInterest={0}
-                  trustScore={trustScore}
-                  gracePeriodHours={currentTier?.gracePeriodHours}
-                  engine={engine}
-                />
+              <BorrowHealthMonitor
+                collateralValue={totalCollateralValuation}
+                debtValue={Number(borrowAmount) || 0}
+                accruedInterest={0}
+                trustScore={trustScore}
+                gracePeriodHours={currentTier?.gracePeriodHours}
+                engine={engine}
+              />
 
-                <LiquidationRiskSimulator
-                  collateralValue={totalCollateralValuation}
-                  borrowValue={Number(borrowAmount) || 0}
-                  accruedInterest={0}
-                  annualRatePct={calculatedBorrowRate}
-                  trustScore={trustScore}
-                  standardLimitRatio={STANDARD_BORROW_LTV}
-                  isReputationMode={isReputationMode}
-                />
-              </div>
-
-              {/* Right Sticky Sidebar Column */}
-              <div className="lg:col-span-4 lg:sticky lg:top-20 space-y-4">
-                <BorrowPanel
-                  collateralAssets={collateralAssets}
-                  borrowAssets={borrowAssets}
-                  activeCollateral={activeCollateral}
-                  setActiveCollateral={setActiveCollateral}
-                  activeBorrow={activeBorrow}
-                  setActiveBorrow={setActiveBorrow}
-                  collateralAmount={collateralAmount}
-                  setCollateralAmount={setCollateralAmount}
-                  borrowAmount={borrowAmount}
-                  setBorrowAmount={setBorrowAmount}
-                  healthFactor={currentHealthFactor}
-                  ltv={currentLtvValue}
-                  liquidationThreshold={currentCollateralAsset.liquidationThreshold * 100}
-                  borrowCapacity={maxBorrowCapacity}
-                  trustScore={trustScore}
-                  onConfirmBorrow={handleCreateBorrowPosition}
-                  onConfirmRepay={handleRepayLoan}
-                  isReputationMode={isReputationMode}
-                  engine={engine}
-                />
-              </div>
+              <LiquidationRiskSimulator
+                collateralValue={totalCollateralValuation}
+                borrowValue={Number(borrowAmount) || 0}
+                accruedInterest={0}
+                annualRatePct={calculatedBorrowRate}
+                trustScore={trustScore}
+                standardLimitRatio={STANDARD_BORROW_LTV}
+                isReputationMode={isReputationMode}
+              />
             </div>
-          ) : (
-            <div className="space-y-6 py-4">
-              {/* Feature Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  {
-                    icon: (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18 9 11.25l4.306 4.307a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.942" />
-                      </svg>
-                    ),
-                    title: 'Earn Passive Yield',
-                    desc: 'Supply USDC, SOL or BTC into live pools and watch your balance compound — real yield, paid by protocol borrowers, every single block.',
-                    tag: 'Up to 14% APY',
-                    iconGrad: 'from-emerald-400 to-teal-600',
-                    glow: 'shadow-emerald-500/40',
-                    tagCls: 'text-emerald-300 bg-emerald-500/10 border-emerald-400/30',
-                    hoverBorder: 'hover:border-emerald-500/40',
-                    blob: 'bg-emerald-500/25',
-                  },
-                  {
-                    icon: (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-                      </svg>
-                    ),
-                    title: 'Non-Custodial & Secure',
-                    desc: 'Funds stay locked in audited Solana smart contracts. No middleman ever touches your assets — you alone hold the keys to every withdrawal.',
-                    tag: 'On-Chain Vault',
-                    iconGrad: 'from-sky-400 to-blue-600',
-                    glow: 'shadow-blue-500/40',
-                    tagCls: 'text-sky-300 bg-sky-500/10 border-sky-400/30',
-                    hoverBorder: 'hover:border-sky-500/40',
-                    blob: 'bg-sky-500/25',
-                  },
-                  {
-                    icon: (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.456-2.456L14.25 6l1.035-.259a3.375 3.375 0 0 0 2.456-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
-                      </svg>
-                    ),
-                    title: 'Reputation-Boosted Rates',
-                    desc: 'Trust is alpha. Supplying to reputation-verified borrowers unlocks a yield premium — the higher their score, the better the rate for both sides.',
-                    tag: 'Trust Premium',
-                    iconGrad: 'from-violet-500 to-fuchsia-600',
-                    glow: 'shadow-violet-500/40',
-                    tagCls: 'text-violet-300 bg-violet-500/10 border-violet-400/30',
-                    hoverBorder: 'hover:border-violet-500/40',
-                    blob: 'bg-violet-500/25',
-                  },
-                ].map((f) => (
-                  <div
-                    key={f.title}
-                    className={`group relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-b from-slate-900/80 to-slate-900/30 p-5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 ${f.hoverBorder}`}
-                  >
-                    {/* hover glow blob */}
-                    <div className={`pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full ${f.blob} blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100`} />
-                    {/* top accent line */}
-                    <div className={`pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r ${f.iconGrad} opacity-0 transition-opacity duration-300 group-hover:opacity-60`} />
 
-                    <div className="relative z-10 space-y-4">
-                      <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${f.iconGrad} flex items-center justify-center text-white shadow-lg ${f.glow} transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6`}>
-                        {f.icon}
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="text-base font-bold text-white tracking-tight font-display">{f.title}</h3>
-                          <span className={`text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${f.tagCls}`}>{f.tag}</span>
-                        </div>
-                        <p className="text-xs text-slate-400 leading-relaxed">{f.desc}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Live Lending Pools — supply assets & earn yield */}
-              <LendingSupplySection />
+            {/* Right Sticky Sidebar Column */}
+            <div className="lg:col-span-4 lg:sticky lg:top-20 space-y-4">
+              <BorrowPanel
+                collateralAssets={collateralAssets}
+                borrowAssets={borrowAssets}
+                activeCollateral={activeCollateral}
+                setActiveCollateral={setActiveCollateral}
+                activeBorrow={activeBorrow}
+                setActiveBorrow={setActiveBorrow}
+                collateralAmount={collateralAmount}
+                setCollateralAmount={setCollateralAmount}
+                borrowAmount={borrowAmount}
+                setBorrowAmount={setBorrowAmount}
+                healthFactor={currentHealthFactor}
+                ltv={currentLtvValue}
+                liquidationThreshold={currentCollateralAsset.liquidationThreshold * 100}
+                borrowCapacity={maxBorrowCapacity}
+                trustScore={trustScore}
+                onConfirmBorrow={handleCreateBorrowPosition}
+                onConfirmRepay={handleRepayLoan}
+                isReputationMode={isReputationMode}
+                engine={engine}
+              />
             </div>
-          )}
+          </div>
         </main>
       ) : activeNavigation === 'Portfolio' ? (
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-5">

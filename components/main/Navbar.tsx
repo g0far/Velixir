@@ -15,7 +15,8 @@ const TABS = [
     { name: "Home", href: "#home" },
     { name: "Market", href: "/market" },
     { name: "Liquidity&Staking", href: "/liquidity" },
-    { name: "Lending&Borrow", href: "/borrow" },
+    { name: "Lending", href: "/lending" },
+    { name: "Borrow", href: "/borrow" },
     { name: "Portfolio", href: "/borrow?tab=Portfolio" },
     { name: "Project", href: "/project", isDropdown: true }
 ];
@@ -66,6 +67,10 @@ const Navbar = () => {
             setActiveTab("Market");
         } else if (pathname === "/liquidity") {
             setActiveTab("Liquidity&Staking");
+        } else if (pathname === "/lending") {
+            setActiveTab("Lending");
+        } else if (pathname === "/borrow") {
+            setActiveTab("Borrow");
         } else if (pathname === "/docs") {
             setActiveTab("Project");
         } else if (pathname === "/project") {
@@ -125,9 +130,14 @@ const Navbar = () => {
                         className="cursor-pointer hover:animate-spin w-10 mr-[10px]"
                     />
 
-                    <span className="font-bold block text-white z-50 md:text-lg text-xl">
-                        VELIXIR
-                    </span>
+                    <div className="flex flex-col justify-center leading-none select-none">
+                        <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-indigo-400 tracking-normal text-lg leading-none">
+                            VELIXIR
+                        </span>
+                        <span className="text-[7.5px] font-semibold text-indigo-300/80 tracking-[0.12em] uppercase mt-[2px] whitespace-nowrap">
+                            REPUTATION FINANCE
+                        </span>
+                    </div>
                 </Link>
 
                 {/* Sliding indicator navigation matching Borrow page design */}
@@ -241,6 +251,13 @@ const Navbar = () => {
                                             : 'text-slate-200 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]'
                                     }`}
                                 >
+                                    {tab.name === "Borrow" && (
+                                        <span className="absolute -top-1 left-1/2 -translate-x-1/2 flex items-center justify-center animate-pulse">
+                                            <svg className="w-3.5 h-3.5 text-amber-400 fill-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.8)]" viewBox="0 0 24 24">
+                                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                                            </svg>
+                                        </span>
+                                    )}
                                     {tab.name}
                                 </Link>
                             );
@@ -444,13 +461,22 @@ const Navbar = () => {
                                 key={tab.name}
                                 href={pathname === "/" ? tab.href : (tab.href.startsWith("#") ? `/${tab.href}` : tab.href)}
                                 onClick={() => { setActiveTab(tab.name); setMobileMenuOpen(false); }}
-                                className={`px-4 py-3 rounded-xl text-sm font-bold transition-colors ${
+                                className={`relative px-4 py-3 rounded-xl text-sm font-bold transition-colors ${
                                     activeTab === tab.name
                                         ? 'bg-[#7042f8]/20 text-white'
                                         : 'text-slate-200 hover:bg-white/5 hover:text-white'
                                 }`}
                             >
-                                {tab.name}
+                                {tab.name === "Borrow" && (
+                                    <span className="absolute top-2 left-[14px] flex items-center justify-center animate-pulse">
+                                        <svg className="w-3.5 h-3.5 text-amber-400 fill-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.8)]" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                                        </svg>
+                                    </span>
+                                )}
+                                <span className={tab.name === "Borrow" ? "pt-0.5 block" : ""}>
+                                    {tab.name}
+                                </span>
                             </Link>
                         );
                     })}

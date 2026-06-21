@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Wallet, Bell, Loader2, ChevronDown, CheckCircle, LogOut, Menu, X } from 'lucide-react';
 import { useWalletStore, BASE_SEPOLIA_CHAIN_ID } from '@/lib/store/walletStore';
@@ -9,7 +10,7 @@ import ClaimFaucet from '@/components/main/ClaimFaucet';
 
 interface HeaderProps {
   activeTab: string;
-  setActiveTab: (tab: string) => void;
+  setActiveTab?: (tab: string) => void;
 }
 
 const logoUrl = '/favicon.png';
@@ -41,7 +42,7 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
   const [walletMenuOpen, setWalletMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  const tabs = ['Home', 'Market', 'Liquidity&Staking', 'Lending&Borrow', 'Reputation', 'Portfolio'];
+  const tabs = ['Home', 'Market', 'Liquidity&Staking', 'Lending', 'Borrow', 'Reputation', 'Portfolio'];
   const navRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<(HTMLButtonElement | HTMLAnchorElement | null)[]>([]);
   const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
@@ -71,12 +72,12 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
             <div className="flex h-10 w-10 items-center justify-center drop-shadow-[0_0_12px_rgba(139,92,246,0.7)]">
               <img src={logoUrl} alt="VELIXIR Logo" className="h-10 w-10 object-contain" />
             </div>
-            <div>
-              <span className="font-display text-xl font-bold tracking-tight text-white bg-clip-text">
+            <div className="flex flex-col justify-center leading-none select-none">
+              <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-indigo-400 tracking-normal text-lg leading-none">
                 VELIXIR
               </span>
-              <div className="font-mono text-[9px] tracking-widest text-indigo-400 font-bold uppercase leading-none">
-                Reputation Finance
+              <div className="text-[7.5px] font-semibold text-indigo-300/80 tracking-[0.12em] uppercase mt-[2px] whitespace-nowrap">
+                REPUTATION FINANCE
               </div>
             </div>
           </a>
@@ -104,53 +105,58 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
                 }}
               />
               {tabs.map((tab, idx) => {
-                if (tab === 'Home') {
+                const isLocalTab = activeTab !== 'Lending' && ['Borrow', 'Reputation', 'Portfolio'].includes(tab);
+                
+                let href = '/';
+                if (tab === 'Market') href = '/market';
+                else if (tab === 'Liquidity&Staking') href = '/liquidity';
+                else if (tab === 'Lending') href = '/lending';
+                else if (tab === 'Borrow') href = '/borrow';
+                else if (tab === 'Reputation') href = '/borrow?tab=Reputation';
+                else if (tab === 'Portfolio') href = '/borrow?tab=Portfolio';
+
+                if (tab === 'Home' || tab === 'Market' || tab === 'Liquidity&Staking' || !isLocalTab) {
                   return (
-                    <a
+                    <Link
                       key={tab}
-                      ref={(el) => { btnRefs.current[idx] = el; }}
-                      href="/"
-                      className="relative z-10 px-4 py-2 text-xs font-medium rounded-lg transition-colors duration-200 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer"
+                      ref={(el) => { btnRefs.current[idx] = el as unknown as HTMLAnchorElement; }}
+                      href={href}
+                      className={`relative z-10 px-4 py-2 text-xs font-medium rounded-lg transition-colors duration-200 flex items-center justify-center cursor-pointer ${
+                        activeTab === tab
+                          ? 'text-white'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
                     >
-                      {tab}
-                    </a>
+                      {tab === 'Borrow' && (
+                        <span className="absolute -top-1 left-1/2 -translate-x-1/2 flex items-center justify-center animate-pulse">
+                          <svg className="w-3.5 h-3.5 text-amber-400 fill-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.8)]" viewBox="0 0 24 24">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                          </svg>
+                        </span>
+                      )}
+                      {tab === 'Liquidity&Staking' ? 'Liquidity & Staking' : tab}
+                    </Link>
                   );
                 }
-                if (tab === 'Market') {
-                  return (
-                    <a
-                      key={tab}
-                      ref={(el) => { btnRefs.current[idx] = el; }}
-                      href="/market"
-                      className="relative z-10 px-4 py-2 text-xs font-medium rounded-lg transition-colors duration-200 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer"
-                    >
-                      {tab}
-                    </a>
-                  );
-                }
-                if (tab === 'Liquidity&Staking') {
-                  return (
-                    <a
-                      key={tab}
-                      ref={(el) => { btnRefs.current[idx] = el; }}
-                      href="/liquidity"
-                      className="relative z-10 px-4 py-2 text-xs font-medium rounded-lg transition-colors duration-200 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer"
-                    >
-                      {tab}
-                    </a>
-                  );
-                }
+
                 return (
                   <button
                     key={tab}
                     ref={(el) => { btnRefs.current[idx] = el; }}
-                    onClick={() => setActiveTab(tab)}
+                    onClick={() => setActiveTab?.(tab)}
                     className={`relative z-10 px-4 py-2 text-xs font-medium rounded-lg transition-colors duration-200 ${
                       activeTab === tab
                         ? 'text-white'
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
+                    {tab === 'Borrow' && (
+                      <span className="absolute -top-1 left-1/2 -translate-x-1/2 flex items-center justify-center animate-pulse">
+                        <svg className="w-3.5 h-3.5 text-amber-400 fill-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.8)]" viewBox="0 0 24 24">
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                      </span>
+                    )}
                     {tab}
                   </button>
                 );
@@ -347,16 +353,62 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
           {mobileNavOpen && (
             <div className="lg:hidden absolute top-full left-0 right-0 mt-2 rounded-2xl bg-slate-950/95 backdrop-blur-md border border-white/10 shadow-2xl p-2 flex flex-col gap-1 z-50">
               {tabs.map((tab) => {
-                const base = "px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-left";
+                const base = "relative px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-left";
                 const cls = activeTab === tab
                   ? `${base} bg-[#7042f8]/20 text-white`
                   : `${base} text-slate-300 hover:bg-white/5 hover:text-white`;
-                if (tab === 'Home') return <a key={tab} href="/" onClick={() => setMobileNavOpen(false)} className={cls}>{tab}</a>;
-                if (tab === 'Market') return <a key={tab} href="/market" onClick={() => setMobileNavOpen(false)} className={cls}>{tab}</a>;
-                if (tab === 'Liquidity&Staking') return <a key={tab} href="/liquidity" onClick={() => setMobileNavOpen(false)} className={cls}>{tab}</a>;
+                
+                const isLocalTab = activeTab !== 'Lending' && ['Borrow', 'Reputation', 'Portfolio'].includes(tab);
+
+                let href = '/';
+                if (tab === 'Market') href = '/market';
+                else if (tab === 'Liquidity&Staking') href = '/liquidity';
+                else if (tab === 'Lending') href = '/lending';
+                else if (tab === 'Borrow') href = '/borrow';
+                else if (tab === 'Reputation') href = '/borrow?tab=Reputation';
+                else if (tab === 'Portfolio') href = '/borrow?tab=Portfolio';
+
+                if (tab === 'Home' || tab === 'Market' || tab === 'Liquidity&Staking' || !isLocalTab) {
+                  return (
+                    <Link
+                      key={tab}
+                      href={href}
+                      onClick={() => setMobileNavOpen(false)}
+                      className={cls}
+                    >
+                      {tab === 'Borrow' && (
+                        <span className="absolute top-2 left-[14px] flex items-center justify-center animate-pulse">
+                          <svg className="w-3.5 h-3.5 text-amber-400 fill-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.8)]" viewBox="0 0 24 24">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                          </svg>
+                        </span>
+                      )}
+                      <span className={tab === 'Borrow' ? "pt-0.5 block" : ""}>
+                        {tab === 'Liquidity&Staking' ? 'Liquidity & Staking' : tab}
+                      </span>
+                    </Link>
+                  );
+                }
+
                 return (
-                  <button key={tab} onClick={() => { setActiveTab(tab); setMobileNavOpen(false); }} className={cls}>
-                    {tab}
+                  <button
+                    key={tab}
+                    onClick={() => {
+                      setActiveTab?.(tab);
+                      setMobileNavOpen(false);
+                    }}
+                    className={cls}
+                  >
+                    {tab === 'Borrow' && (
+                      <span className="absolute top-2 left-[14px] flex items-center justify-center animate-pulse">
+                        <svg className="w-3.5 h-3.5 text-amber-400 fill-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.8)]" viewBox="0 0 24 24">
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                      </span>
+                    )}
+                    <span className={tab === 'Borrow' ? "pt-0.5 block text-left w-full" : ""}>
+                      {tab}
+                    </span>
                   </button>
                 );
               })}
