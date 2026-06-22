@@ -28,15 +28,16 @@ export interface LendingPool {
   seedBorrowedUSD: number; // seed liquidity already borrowed (USD)
 }
 
-// Pool TVL shown on the Liquidity page = seedSuppliedUSD − seedBorrowedUSD, and
-// the per-pool "Liquidity" token amount = TVL / price (auto-adjusts to the TVL).
-// Seeds are sized to the target Pool TVLs (RLO $50k, USDC $30k, USDT $25k,
-// SOL $40k) while keeping realistic utilization so APY/utilization stay sensible.
+// The Lending page "Total Supply" column = seedSuppliedUSD (+ the user's own
+// deposits), and the Liquidity page reads the real on-chain vault when devnet is
+// reachable. Seeds are pinned to the actual on-chain vault TVLs so both pages
+// agree: RLO $50k, USDC $70k, USDT $60k, SOL ~$7.6k (50 SOL). seedBorrowedUSD is
+// kept at a realistic fraction so utilization / APY stay sensible.
 export const LENDING_POOLS: LendingPool[] = [
-  { symbol: 'RLO',  label: 'RIALO', risk: 'Medium', base: 0.020, slope1: 0.18, slope2: 2.50, optimalU: 0.75, reserve: 0.10, trustPremium: 0.080, seedSuppliedUSD: 90_000,  seedBorrowedUSD: 40_000 },
-  { symbol: 'USDC', label: 'USDC',  risk: 'Low',    base: 0.005, slope1: 0.14, slope2: 0.90, optimalU: 0.90, reserve: 0.10, trustPremium: 0.025, seedSuppliedUSD: 135_000, seedBorrowedUSD: 105_000 },
-  { symbol: 'USDT', label: 'USDT',  risk: 'Low',    base: 0.005, slope1: 0.14, slope2: 0.90, optimalU: 0.90, reserve: 0.10, trustPremium: 0.025, seedSuppliedUSD: 85_000,  seedBorrowedUSD: 60_000 },
-  { symbol: 'SOL',  label: 'SOL',   risk: 'Medium', base: 0.010, slope1: 0.10, slope2: 1.20, optimalU: 0.80, reserve: 0.15, trustPremium: 0.020, seedSuppliedUSD: 105_000, seedBorrowedUSD: 65_000 },
+  { symbol: 'RLO',  label: 'RIALO', risk: 'Medium', base: 0.020, slope1: 0.18, slope2: 2.50, optimalU: 0.75, reserve: 0.10, trustPremium: 0.080, seedSuppliedUSD: 50_000, seedBorrowedUSD: 22_000 },
+  { symbol: 'USDC', label: 'USDC',  risk: 'Low',    base: 0.005, slope1: 0.14, slope2: 0.90, optimalU: 0.90, reserve: 0.10, trustPremium: 0.025, seedSuppliedUSD: 70_000, seedBorrowedUSD: 55_000 },
+  { symbol: 'USDT', label: 'USDT',  risk: 'Low',    base: 0.005, slope1: 0.14, slope2: 0.90, optimalU: 0.90, reserve: 0.10, trustPremium: 0.025, seedSuppliedUSD: 60_000, seedBorrowedUSD: 42_000 },
+  { symbol: 'SOL',  label: 'SOL',   risk: 'Medium', base: 0.010, slope1: 0.10, slope2: 1.20, optimalU: 0.80, reserve: 0.15, trustPremium: 0.020, seedSuppliedUSD: 7_600,  seedBorrowedUSD: 4_500 },
 ];
 
 export const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;
