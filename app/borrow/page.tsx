@@ -767,16 +767,33 @@ export default function BorrowPage() {
                   const cred = credentials.find((c) => c.id === att.id);
                   const isActive = cred?.active ?? false;
                   return (
-                    <div key={att.id} className="flex justify-between items-center py-3 text-xs">
+                    <div key={att.id} className="flex justify-between items-center py-3.5 text-xs">
                       <div>
                         <p className="font-semibold text-white">{att.name}</p>
                         <p className="text-[10px] text-slate-500 font-mono mt-0.5">{att.cert}</p>
                       </div>
-                      <div className="text-right">
-                        <span className="text-xs font-semibold text-slate-300">{att.validity}</span>
-                        <span className={`block text-[10px] font-mono font-bold mt-0.5 ${isActive ? 'text-emerald-400' : 'text-slate-500'}`}>
-                          {isActive ? 'Active' : 'Not Verified'}
-                        </span>
+                      <div className="flex items-center gap-4 sm:gap-6">
+                        <div className="text-right hidden sm:block">
+                          <span className="text-xs font-semibold text-slate-300">{att.validity}</span>
+                          <span className={`block text-[10px] font-mono font-bold mt-0.5 ${isActive ? 'text-emerald-400' : 'text-slate-500'}`}>
+                            {isActive ? 'Active' : 'Not Verified'}
+                          </span>
+                        </div>
+                        {isActive ? (
+                          <button
+                            onClick={() => handleToggleCredential(att.id)}
+                            className="px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 hover:border-rose-500/30 text-[10px] font-bold tracking-wider uppercase transition-all duration-200 cursor-pointer"
+                          >
+                            Unlink
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleToggleCredential(att.id)}
+                            className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-500/30 text-[10px] font-bold tracking-wider uppercase transition-all duration-200 cursor-pointer shadow-[0_0_12px_rgba(99,102,241,0.15)] hover:shadow-[0_0_12px_rgba(99,102,241,0.3)]"
+                          >
+                            Verify
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
