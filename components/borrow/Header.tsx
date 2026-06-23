@@ -41,8 +41,13 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [walletMenuOpen, setWalletMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
+  const [mobileProjectDropdownOpen, setMobileProjectDropdownOpen] = useState(false);
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const [mobileHoveredIdx, setMobileHoveredIdx] = useState<number | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const tabs = ['Home', 'Market', 'Liquidity&Staking', 'Lending', 'Borrow', 'Reputation', 'Portfolio'];
+  const tabs = ['Home', 'Market', 'Liquidity&Staking', 'Lending', 'Borrow', 'Reputation', 'Portfolio', 'Project'];
   const navRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<(HTMLButtonElement | HTMLAnchorElement | null)[]>([]);
   const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
@@ -60,6 +65,18 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
       });
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setProjectDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const recent = transactions.slice(0, 6);
 
@@ -112,6 +129,78 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
                 }}
               />
               {tabs.map((tab, idx) => {
+                if (tab === 'Project') {
+                  return (
+                    <div key={tab} className="relative" ref={dropdownRef}>
+                      <button
+                        ref={(el) => { btnRefs.current[idx] = el as unknown as HTMLAnchorElement; }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setProjectDropdownOpen(!projectDropdownOpen);
+                        }}
+                        className={`relative z-10 px-4 py-2 text-xs font-bold rounded-lg transition-colors duration-200 cursor-pointer flex items-center gap-1.5 ${
+                          activeTab === tab
+                            ? 'text-white font-extrabold'
+                            : 'text-slate-200 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]'
+                        }`}
+                      >
+                        {tab}
+                        <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${projectDropdownOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                      
+                      {/* Dropdown Menu */}
+                      {projectDropdownOpen && (
+                        <div className="absolute left-1/2 -translate-x-1/2 mt-3 w-40 rounded-xl bg-slate-950/90 border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] p-1.5 z-[60] backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200 flex flex-col gap-0.5">
+                          {/* Vertical sliding purple spotlight indicator */}
+                          <div
+                            style={{
+                              position: 'absolute',
+                              left: 6,
+                              right: 6,
+                              top: hoveredIdx !== null ? (hoveredIdx * 38 + 6) : 6,
+                              height: 36,
+                              opacity: hoveredIdx !== null ? 1 : 0,
+                              transition: 'transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), top 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease',
+                              transform: hoveredIdx !== null ? 'scale(1)' : 'scale(0.95)',
+                              background: 'linear-gradient(to right, #7c3aed, #6366f1)',
+                              boxShadow: '0 4px 14px 0 rgba(124, 58, 237, 0.4)',
+                              borderRadius: 8,
+                              pointerEvents: 'none',
+                              zIndex: 0,
+                            }}
+                          />
+                          <Link
+                            href="/project"
+                            onMouseEnter={() => setHoveredIdx(0)}
+                            onMouseLeave={() => setHoveredIdx(null)}
+                            onClick={() => {
+                              setProjectDropdownOpen(false);
+                            }}
+                            className={`relative z-10 w-full h-9 flex items-center justify-center rounded-lg text-xs font-bold transition-colors duration-200 cursor-pointer ${
+                              hoveredIdx === 0 ? 'text-white' : 'text-slate-300'
+                            }`}
+                          >
+                            Project
+                          </Link>
+                          <Link
+                            href="/docs"
+                            onMouseEnter={() => setHoveredIdx(1)}
+                            onMouseLeave={() => setHoveredIdx(null)}
+                            onClick={() => {
+                              setProjectDropdownOpen(false);
+                            }}
+                            className={`relative z-10 w-full h-9 flex items-center justify-center rounded-lg text-xs font-bold transition-colors duration-200 cursor-pointer ${
+                              hoveredIdx === 1 ? 'text-white' : 'text-slate-300'
+                            }`}
+                          >
+                            Docs
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
                 const isLocalTab = activeTab !== 'Lending' && ['Borrow', 'Reputation', 'Portfolio'].includes(tab);
                 
                 let href = '/';
@@ -360,6 +449,58 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
           {mobileNavOpen && (
             <div className="lg:hidden absolute top-full left-0 right-0 mt-2 rounded-2xl bg-slate-950/95 backdrop-blur-md border border-white/10 shadow-2xl p-2 flex flex-col gap-1 z-50">
               {tabs.map((tab) => {
+                if (tab === 'Project') {
+                  return (
+                    <div key={tab} className="flex flex-col">
+                      <button
+                        onClick={() => setMobileProjectDropdownOpen(!mobileProjectDropdownOpen)}
+                        className={`px-4 py-3 rounded-xl text-sm font-bold transition-colors flex items-center justify-between text-left ${
+                          activeTab === tab
+                            ? 'bg-[#7042f8]/10 text-white'
+                            : 'text-slate-200 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        <span>{tab}</span>
+                        <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${mobileProjectDropdownOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                      
+                      {/* Mobile Dropdown Items */}
+                      {mobileProjectDropdownOpen && (
+                        <div className="flex flex-col gap-0.5 pl-4 mt-1 border-l border-[#7042f880] ml-4 py-1.5 animate-in fade-in slide-in-from-top-1 duration-200 relative">
+                          <Link
+                            href="/project"
+                            onMouseEnter={() => setMobileHoveredIdx(0)}
+                            onMouseLeave={() => setMobileHoveredIdx(null)}
+                            onClick={() => {
+                              setMobileNavOpen(false);
+                              setMobileProjectDropdownOpen(false);
+                            }}
+                            className={`relative z-10 w-full h-9 flex items-center justify-start px-4 rounded-xl text-xs font-bold transition-colors duration-200 cursor-pointer ${
+                              mobileHoveredIdx === 0 ? 'text-white' : 'text-slate-300'
+                            }`}
+                          >
+                            Project
+                          </Link>
+                          <Link
+                            href="/docs"
+                            onMouseEnter={() => setMobileHoveredIdx(1)}
+                            onMouseLeave={() => setMobileHoveredIdx(null)}
+                            onClick={() => {
+                              setMobileNavOpen(false);
+                              setMobileProjectDropdownOpen(false);
+                            }}
+                            className={`relative z-10 w-full h-9 flex items-center justify-start px-4 rounded-xl text-xs font-bold transition-colors duration-200 cursor-pointer ${
+                              mobileHoveredIdx === 1 ? 'text-white' : 'text-slate-300'
+                            }`}
+                          >
+                            Docs
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
                 const base = "relative px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-left";
                 const cls = activeTab === tab
                   ? `${base} bg-[#7042f8]/20 text-white`
