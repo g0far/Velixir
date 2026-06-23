@@ -782,53 +782,6 @@ export default function BorrowPage() {
                   );
                 })}
               </div>
-
-              {/* Tier Progression */}
-              <div className="pt-4 border-t border-white/5">
-                <p className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-3">Tier Progression</p>
-                <div className="space-y-2">
-                  {TRUST_TIERS.map((tier) => {
-                    const isActive = currentTier?.name === tier.name;
-                    const isUnlocked = trustScore >= tier.minScore;
-                    return (
-                      <div
-                        key={tier.name}
-                        className={`flex items-center justify-between px-3 py-2.5 rounded-lg border transition-all ${
-                          isActive
-                            ? `${tier.color.bg} ${tier.color.border}`
-                            : isUnlocked
-                            ? 'bg-slate-900/40 border-white/5'
-                            : 'bg-slate-950/20 border-white/5 opacity-40'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <TrustTierBadge trustScore={isActive ? trustScore : (isUnlocked ? tier.minScore : 0)} size="sm" showLabel={true} />
-                          <div className="text-[10px] font-mono text-slate-400">Score {tier.minScore}+</div>
-                        </div>
-                        <div className="flex items-center gap-4 text-[10px] font-mono">
-                          <div className="text-center">
-                            <div className="text-slate-600 uppercase text-[8px]">Reduction</div>
-                            <div className={isActive ? tier.color.text : 'text-slate-400'}>{(tier.borrowCapacityPct * 100).toFixed(0)}%</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-slate-600 uppercase text-[8px]">APY</div>
-                            <div className={isActive ? tier.color.text : 'text-slate-400'}>{tier.apy.toFixed(1)}%</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-slate-600 uppercase text-[8px]">Grace</div>
-                            <div className={isActive ? tier.color.text : 'text-slate-400'}>{tier.gracePeriodHours}h</div>
-                          </div>
-                          {isActive && (
-                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${tier.color.bg} ${tier.color.text} border ${tier.color.border}`}>
-                              ACTIVE
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
             </div>
           </div>
         </main>
