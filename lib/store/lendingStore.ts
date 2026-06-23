@@ -12,11 +12,11 @@ import { persist } from 'zustand/middleware';
 //
 // Lenders only earn on the borrowed fraction (·U), minus a protocol reserve cut.
 // `trustPremium` redistributes a slice of reputation-based origination fees to
-// suppliers — RIALO carries a large premium as native-token liquidity mining.
+// suppliers — RLO carries a large premium as native-token liquidity mining.
 
 export interface LendingPool {
   symbol: string;          // canonical price/logo key (USDC, USDT, SOL, BTC, RLO)
-  label: string;           // display label (RLO shows as "RIALO")
+  label: string;           // display label (RLO shows as "RLO")
   risk: 'Low' | 'Medium';
   base: number;            // base borrow APR at U=0
   slope1: number;          // slope below the optimal-utilization kink
@@ -34,7 +34,7 @@ export interface LendingPool {
 // agree: RLO $50k, USDC $70k, USDT $60k, SOL ~$7.6k (50 SOL). seedBorrowedUSD is
 // kept at a realistic fraction so utilization / APY stay sensible.
 export const LENDING_POOLS: LendingPool[] = [
-  { symbol: 'RLO',  label: 'RIALO', risk: 'Medium', base: 0.020, slope1: 0.18, slope2: 2.50, optimalU: 0.75, reserve: 0.10, trustPremium: 0.080, seedSuppliedUSD: 50_000, seedBorrowedUSD: 22_000 },
+  { symbol: 'RLO',  label: 'RLO', risk: 'Medium', base: 0.020, slope1: 0.18, slope2: 2.50, optimalU: 0.75, reserve: 0.10, trustPremium: 0.080, seedSuppliedUSD: 50_000, seedBorrowedUSD: 22_000 },
   { symbol: 'USDC', label: 'USDC',  risk: 'Low',    base: 0.005, slope1: 0.14, slope2: 0.90, optimalU: 0.90, reserve: 0.10, trustPremium: 0.025, seedSuppliedUSD: 70_000, seedBorrowedUSD: 55_000 },
   { symbol: 'USDT', label: 'USDT',  risk: 'Low',    base: 0.005, slope1: 0.14, slope2: 0.90, optimalU: 0.90, reserve: 0.10, trustPremium: 0.025, seedSuppliedUSD: 60_000, seedBorrowedUSD: 42_000 },
   { symbol: 'SOL',  label: 'SOL',   risk: 'Medium', base: 0.010, slope1: 0.10, slope2: 1.20, optimalU: 0.80, reserve: 0.15, trustPremium: 0.020, seedSuppliedUSD: 7_600,  seedBorrowedUSD: 4_500 },
