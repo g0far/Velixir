@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import Header from '@/components/borrow/Header';
 import SplashScreen from '@/components/borrow/SplashScreen';
 import Metrics from '@/components/borrow/Metrics';
@@ -19,7 +20,7 @@ import WalletModal from '@/components/borrow/WalletModal';
 import AmountModal from '@/components/borrow/AmountModal';
 import PortfolioSection from '@/components/borrow/PortfolioSection';
 import { Asset, Position } from '@/lib/types/borrow';
-import { ChevronRight, BarChart3, Fingerprint, AlertTriangle } from 'lucide-react';
+import { ChevronRight, BarChart3, Fingerprint, AlertTriangle, FileText, Landmark, ShieldCheck, CheckCircle2, Upload, Loader2, Sparkles, UserCheck, X } from 'lucide-react';
 
 import { useTrustStore, DEFAULT_CREDENTIALS, selectReductionSum, selectTrustScore, selectCollateralRatio, selectInterestRate, selectApprovalChance, computeELT, computeMaxBorrowLTV, computeMaxBorrowCapacity, computeBorrowHealth, STANDARD_BORROW_LTV, getTrustTier, TRUST_TIERS, BASE_INTEREST_RATE, computeTierAPY, BASE_COLLATERAL_RATIO } from '@/lib/store/trustStore';
 import { computeLendingEngine, STANDARD_COLLATERAL_RATIO_FACTOR } from '@/lib/store/borrowEngine';
@@ -56,6 +57,66 @@ export default function BorrowPage() {
   // 3D holographic card interactive tilt states
   const [cardTilt, setCardTilt] = useState({ x: 0, y: 0 });
   const [cardShiny, setCardShiny] = useState({ x: 50, y: 50, opacity: 0 });
+
+  // Dynamic Verification Modal states
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  const [verifyingCred, setVerifyingCred] = useState<{ id: string; name: string; cert: string; validity: string } | null>(null);
+  const [verificationStep, setVerificationStep] = useState<'upload' | 'processing' | 'success'>('upload');
+  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+  const [bankConnected, setBankConnected] = useState<string | null>(null);
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState('');
+
+  const handleOpenVerification = (att: { id: string; name: string; cert: string; validity: string }) => {
+    if (!connected) {
+      toast.warning('Wallet not connected', 'Please connect your wallet to verify credentials.');
+      return;
+    }
+    if (wrongNetwork) {
+      toast.error('Wrong Network', 'Please switch to Solana Devnet.');
+      return;
+    }
+    setVerifyingCred(att);
+    setVerificationStep('upload');
+    setUploadedFile(null);
+    setBankConnected(null);
+    setConsentChecked(false);
+    setIsVerifyModalOpen(true);
+  };
+
+  const handleStartProcessing = () => {
+    if (!verifyingCred) return;
+    setVerificationStep('processing');
+    
+    const statuses = [
+      'Initializing encrypted payload...',
+      'Uploading securely to decentralised verification node...',
+      'Verifying zero-knowledge proof validity...',
+      'Recording attestation certificate on Solana Ledger...'
+    ];
+    
+    let index = 0;
+    setProcessingStatus(statuses[0]);
+    
+    const interval = setInterval(() => {
+      index++;
+      if (index < statuses.length) {
+        setProcessingStatus(statuses[index]);
+      } else {
+        clearInterval(interval);
+        // Complete verification
+        setVerificationStep('success');
+        toggleCredential(verifyingCred.id);
+        const cred = credentials.find((c) => c.id === verifyingCred.id);
+        if (cred) {
+          toast.success(
+            'Credential verified',
+            `${cred.title} activated: -${cred.reductionValue * 100}% collateral ratio`
+          );
+        }
+      }
+    }, 1100);
+  };
 
   const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const card = e.currentTarget;
@@ -788,7 +849,7 @@ export default function BorrowPage() {
                           </button>
                         ) : (
                           <button
-                            onClick={() => handleToggleCredential(att.id)}
+                            onClick={() => handleOpenVerification(att)}
                             className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-500/30 text-[10px] font-bold tracking-wider uppercase transition-all duration-200 cursor-pointer shadow-[0_0_12px_rgba(99,102,241,0.15)] hover:shadow-[0_0_12px_rgba(99,102,241,0.3)]"
                           >
                             Verify
@@ -823,6 +884,221 @@ export default function BorrowPage() {
 
       {/* Footer */}
       <VelixirFooter />
+
+      {/* Dynamic Verification Modal */}
+      <AnimatePresence>
+        {isVerifyModalOpen && verifyingCred && (
+          <motion.div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setIsVerifyModalOpen(false)} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+              className="relative w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 shadow-2xl overflow-hidden text-left"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-slate-950/20">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-indigo-400" />
+                  <h3 className="font-display text-sm font-bold text-white">Sovereign Verification Portal</h3>
+                </div>
+                <button
+                  onClick={() => setIsVerifyModalOpen(false)}
+                  className="text-slate-500 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X className="h-4.5 w-4.5" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="p-6 space-y-5">
+                <div className="space-y-1">
+                  <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Selected Attestation</div>
+                  <div className="text-sm font-bold text-white">{verifyingCred.name}</div>
+                  <div className="text-[10px] text-indigo-300 font-mono">{verifyingCred.cert}</div>
+                </div>
+
+                {verificationStep === 'upload' && (
+                  <div className="space-y-4">
+                    {/* KYC (Passport upload + face scan) */}
+                    {verifyingCred.id === 'kyc' && (
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Upload Identity Document</label>
+                        {uploadedFile ? (
+                          <div className="flex items-center justify-between p-3.5 rounded-xl bg-indigo-500/5 border border-indigo-500/20 text-xs">
+                            <span className="font-mono text-slate-300 truncate max-w-[200px]">{uploadedFile}</span>
+                            <button onClick={() => setUploadedFile(null)} className="text-rose-400 hover:text-rose-300 text-[10px] font-bold uppercase">Clear</button>
+                          </div>
+                        ) : (
+                          <div 
+                            onClick={() => setUploadedFile('passport_scan_0x71c.png')}
+                            className="border border-dashed border-white/10 hover:border-indigo-500/30 bg-slate-950/40 hover:bg-slate-950/80 rounded-xl p-6 text-center cursor-pointer transition-all duration-200 group flex flex-col items-center justify-center gap-2"
+                          >
+                            <Upload className="h-6 w-6 text-slate-500 group-hover:text-indigo-400 transition-colors" />
+                            <span className="text-xs text-slate-400">Drag & drop or <span className="text-indigo-400 font-semibold">browse</span> passport/ID scan</span>
+                            <span className="text-[9px] text-slate-600 font-mono">PNG, JPG, PDF up to 5MB</span>
+                          </div>
+                        )}
+                        
+                        <button 
+                          onClick={() => {
+                            if (!uploadedFile) setUploadedFile('passport_scan_0x71c.png');
+                            toast.info('Scanning face...', 'Simulating biometrics scan');
+                          }}
+                          className="w-full py-2.5 rounded-xl border border-white/5 hover:border-white/10 bg-slate-950/40 hover:bg-slate-950/80 text-xs text-slate-300 font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <UserCheck className="h-4 w-4 text-indigo-400" />
+                          Simulate Biometric Face Scan
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Banking Link (Simulated Plaid link) */}
+                    {verifyingCred.id === 'banking' && (
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Connect Banking Node</label>
+                        {bankConnected ? (
+                          <div className="flex items-center justify-between p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-xs">
+                            <span className="font-semibold text-emerald-400 flex items-center gap-1.5">
+                              <Landmark className="h-4 w-4" />
+                              Connected with {bankConnected}
+                            </span>
+                            <button onClick={() => setBankConnected(null)} className="text-rose-400 hover:text-rose-300 text-[10px] font-bold uppercase">Disconnect</button>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-2">
+                            {['Chase Bank', 'Bank of America', 'Wells Fargo', 'Citibank'].map((bank) => (
+                              <button
+                                key={bank}
+                                onClick={() => setBankConnected(bank)}
+                                className="p-3 rounded-xl border border-white/5 hover:border-indigo-500/30 bg-slate-950/40 hover:bg-slate-950/80 text-xs text-slate-300 hover:text-white font-semibold transition-all text-center flex flex-col items-center justify-center gap-1.5 cursor-pointer"
+                              >
+                                <Landmark className="h-4 w-4 text-indigo-400" />
+                                {bank}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        <p className="text-[9px] text-slate-500 font-mono text-center">Protected via zero-knowledge data queries</p>
+                      </div>
+                    )}
+
+                    {/* Credit Score Bureau verification */}
+                    {verifyingCred.id === 'credit_score' && (
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Bureau Attestation Authority</label>
+                        <div className="space-y-2">
+                          <input 
+                            type="password" 
+                            placeholder="Enter SSN / Tax Identification Number"
+                            className="w-full bg-slate-950/80 border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-indigo-500/50"
+                          />
+                          <p className="text-[9px] text-slate-500 font-mono leading-relaxed">
+                            Velixir does not save your SSN. It is queried once via API and encrypted instantly to compute a credit score certificate token.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* On-chain reputation */}
+                    {verifyingCred.id === 'onchain' && (
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Solana Lending History</label>
+                        <div className="p-3.5 rounded-xl bg-slate-950/50 border border-white/5 space-y-2.5 text-[11px]">
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Rialo Active Deposits</span>
+                            <span className="font-mono text-white">Active (Verified)</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Solflare Wallet Age</span>
+                            <span className="font-mono text-white">412 Days</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">Previous Liquidations</span>
+                            <span className="font-mono text-emerald-400 font-semibold">0 Detected</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Credit Reporting Consent */}
+                    {verifyingCred.id === 'consent' && (
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Consent Declaration</label>
+                        <div className="p-3.5 rounded-xl bg-slate-950/50 border border-white/5 text-[10px] text-slate-400 leading-relaxed max-h-24 overflow-y-auto pr-1">
+                          I hereby authorize Velixir Protocol to request encrypted metadata from my linked bureaus (Equifax, Plaid, Coinbase) to calculate and mint a Decentralized Credit Score token on the Solana ledger. I understand my data remains private and I can revoke consent at any time.
+                        </div>
+                        <label className="flex items-start gap-2.5 text-xs text-slate-300 cursor-pointer pt-1">
+                          <input 
+                            type="checkbox" 
+                            checked={consentChecked}
+                            onChange={(e) => setConsentChecked(e.target.checked)}
+                            className="mt-0.5 rounded accent-indigo-600 bg-slate-950/80 border-white/5 cursor-pointer"
+                          />
+                          <span>I sign this consent declaration electronically.</span>
+                        </label>
+                      </div>
+                    )}
+
+                    {/* Confirm / Submit Button */}
+                    <div className="pt-2">
+                      <button
+                        onClick={handleStartProcessing}
+                        disabled={
+                          (verifyingCred.id === 'kyc' && !uploadedFile) ||
+                          (verifyingCred.id === 'banking' && !bankConnected) ||
+                          (verifyingCred.id === 'consent' && !consentChecked)
+                        }
+                        className="w-full py-3 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 cursor-pointer shadow-lg shadow-indigo-600/10 flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Sparkles className="h-4 w-4" />
+                        Generate &amp; Submit Attestation
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {verificationStep === 'processing' && (
+                  <div className="py-8 flex flex-col items-center justify-center gap-4 text-center">
+                    <Loader2 className="h-10 w-10 text-indigo-400 animate-spin" />
+                    <div className="space-y-1">
+                      <h4 className="text-xs font-bold text-white uppercase tracking-wider">Securing Data</h4>
+                      <p className="text-[11px] text-slate-400 font-mono animate-pulse">{processingStatus}</p>
+                    </div>
+                  </div>
+                )}
+
+                {verificationStep === 'success' && (
+                  <div className="py-6 flex flex-col items-center justify-center gap-4 text-center">
+                    <div className="h-12 w-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+                      <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-bold text-white">Attestation Recorded Successfully</h4>
+                      <p className="text-[10px] text-slate-400">Zero-knowledge proof minted on Solana Devnet.</p>
+                      <p className="text-[9px] text-indigo-400 font-mono pt-1">tx: 0x9a8f...b71c</p>
+                    </div>
+                    <div className="pt-3 w-full">
+                      <button
+                        onClick={() => setIsVerifyModalOpen(false)}
+                        className="w-full py-2.5 rounded-xl text-xs font-bold text-white bg-slate-800 hover:bg-slate-700 transition-colors cursor-pointer"
+                      >
+                        Close Portal
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Global overlays */}
       </div>
