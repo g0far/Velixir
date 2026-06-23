@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import VelixirFooter from "@/components/main/VelixirFooter";
 import { LENDING_POOLS, useLendingStore, computeSupplyAPY } from "@/lib/store/lendingStore";
+import { useBorrowStore } from "@/lib/store/borrowStore";
 import { useWalletStore } from "@/lib/store/walletStore";
 import { CryptoIcon } from "@/components/borrow/LendingSupplySection";
 import { BASE_SEPOLIA_CONFIG } from "@/constants/market";
@@ -160,6 +161,7 @@ export default function LiquidityPage() {
     () => (address ? positions[address.toLowerCase()] || [] : []),
     [positions, address]
   );
+  const borrowPositions = useBorrowStore((s) => s.positions);
 
   useEffect(() => {
     startOracle();
@@ -248,8 +250,13 @@ export default function LiquidityPage() {
           thresholdBps: onChain.thresholdBps,
         };
       } else {
+        const userBorrowedAmount = borrowPositions
+          .filter((pos) => pos.borrowAsset === staticPool.symbol)
+          .reduce((sum, pos) => sum + pos.borrowAmount + (pos.accruedInterest ?? 0), 0);
+        const userBorrowedUSD = userBorrowedAmount * price;
+
         const totalSuppliedUSD = staticPool.seedSuppliedUSD + userUSD;
-        const totalBorrowedUSD = staticPool.seedBorrowedUSD;
+        const totalBorrowedUSD = staticPool.seedBorrowedUSD + userBorrowedUSD;
         
         const totalDeposits = price > 0 ? totalSuppliedUSD / price : 0;
         const totalBorrows = price > 0 ? totalBorrowedUSD / price : 0;
@@ -274,7 +281,7 @@ export default function LiquidityPage() {
         };
       }
     });
-  }, [lending, myDeposits, oraclePrices]);
+  }, [lending, myDeposits, borrowPositions, oraclePrices]);
 
   const lendingTvl = useMemo(
     () => integratedLendingPools.reduce((sum, p) => sum + p.vaultBalance * priceOf(p.symbol), 0),
