@@ -53,6 +53,33 @@ export default function BorrowPage() {
   const [mounted, setMounted] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
 
+  // 3D holographic card interactive tilt states
+  const [cardTilt, setCardTilt] = useState({ x: 0, y: 0 });
+  const [cardShiny, setCardShiny] = useState({ x: 50, y: 50, opacity: 0 });
+
+  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const xc = rect.width / 2;
+    const yc = rect.height / 2;
+    const rotateX = -(y - yc) / 10;
+    const rotateY = (x - xc) / 10;
+
+    setCardTilt({ x: rotateX, y: rotateY });
+    setCardShiny({
+      x: (x / rect.width) * 100,
+      y: (y / rect.height) * 100,
+      opacity: 0.6
+    });
+  };
+
+  const handleCardMouseLeave = () => {
+    setCardTilt({ x: 0, y: 0 });
+    setCardShiny(prev => ({ ...prev, opacity: 0 }));
+  };
+
   // Set mounted true on client and listen to search param changes
   useEffect(() => {
     setMounted(true);
@@ -64,6 +91,7 @@ export default function BorrowPage() {
 
         if (tab) {
           setActiveNavigation(tab);
+          setShowSplash(false);
         }
 
         // Clear query params from URL after applying them once,
@@ -434,7 +462,7 @@ export default function BorrowPage() {
       </div>
 
       <div className="relative z-10 flex flex-col flex-1 w-full">
-        {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
+        {mounted && showSplash && <SplashScreen onFinish={handleSplashFinish} />}
         {/* Dynamic Header */}
         <Header activeTab={activeNavigation} setActiveTab={setActiveNavigation} />
 
@@ -621,39 +649,107 @@ export default function BorrowPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="bg-slate-900/60 p-6 rounded-2xl border border-indigo-500/10 space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-mono font-bold text-indigo-400">Velixir DecentID Card</span>
-                <Fingerprint className="h-6 w-6 text-indigo-500" />
+            <div 
+              className="relative bg-gradient-to-br from-indigo-950/40 via-slate-900/80 to-purple-950/40 p-6 rounded-3xl border border-indigo-500/20 space-y-4 overflow-hidden shadow-[0_0_50px_-12px_rgba(99,102,241,0.2)] hover:shadow-[0_0_50px_-6px_rgba(99,102,241,0.4)] cursor-pointer group hover:border-indigo-500/40 transition-all duration-300"
+              onMouseMove={handleCardMouseMove}
+              onMouseLeave={handleCardMouseLeave}
+              style={{
+                transform: `perspective(1000px) rotateX(${cardTilt.x}deg) rotateY(${cardTilt.y}deg)`,
+                transformStyle: 'preserve-3d',
+                transition: cardTilt.x === 0 && cardTilt.y === 0 ? 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.3s ease, box-shadow 0.3s ease' : 'border-color 0.3s ease, box-shadow 0.3s ease',
+              }}
+            >
+              {/* Holographic shimmer effect overlay */}
+              <div
+                className="absolute inset-0 pointer-events-none transition-opacity duration-300 mix-blend-color-dodge"
+                style={{
+                  background: `radial-gradient(circle 220px at ${cardShiny.x}% ${cardShiny.y}%, rgba(255, 255, 255, 0.22) 0%, rgba(99, 102, 241, 0.15) 30%, rgba(168, 85, 247, 0.1) 60%, transparent 100%)`,
+                  opacity: cardShiny.opacity,
+                  zIndex: 10,
+                }}
+              />
+              
+              {/* Diagonal holographic rainbow sheen */}
+              <div
+                className="absolute inset-0 pointer-events-none opacity-20 group-hover:opacity-30 transition-opacity duration-300 mix-blend-overlay"
+                style={{
+                  backgroundImage: 'linear-gradient(135deg, rgba(255,0,128,0.1) 0%, rgba(128,0,255,0.1) 25%, rgba(0,128,255,0.1) 50%, rgba(0,255,128,0.1) 75%, rgba(255,255,0,0.1) 100%)',
+                  backgroundSize: '200% 200%',
+                  backgroundPosition: `${cardShiny.x}% ${cardShiny.y}%`,
+                  zIndex: 2,
+                }}
+              />
+
+              {/* Decorative Tech Grid background */}
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(99,102,241,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(99,102,241,0.03)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none z-0" />
+              <div className="absolute -right-16 -top-16 w-36 h-36 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none z-0" />
+              <div className="absolute -left-16 -bottom-16 w-36 h-36 bg-purple-500/10 rounded-full blur-2xl pointer-events-none z-0" />
+
+              {/* Card Header (Depth Pop) */}
+              <div 
+                className="flex justify-between items-center relative z-10"
+                style={{ transform: 'translateZ(30px)', transformStyle: 'preserve-3d' }}
+              >
+                <span className="text-[10px] font-mono font-bold tracking-widest text-indigo-400 uppercase bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                  Velixir DecentID Card
+                </span>
+                <Fingerprint className="h-6 w-6 text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
               </div>
-              <div className="pt-4 space-y-3">
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-500">HOLDER ID</span>
-                  <span className="font-mono font-bold text-white text-[11px]">0x71C7...6E9a</span>
+
+              {/* Card Chips & Sensor Graphic */}
+              <div 
+                className="flex items-center gap-3 pt-2 relative z-10"
+                style={{ transform: 'translateZ(20px)' }}
+              >
+                {/* Microchip representation */}
+                <div className="w-9 h-7 rounded bg-gradient-to-br from-amber-500/40 via-yellow-600/30 to-amber-700/40 border border-amber-500/30 relative overflow-hidden flex flex-col justify-between p-1">
+                  <div className="w-full h-[1px] bg-amber-400/20" />
+                  <div className="flex justify-between">
+                    <div className="w-1.5 h-full bg-amber-400/20 border-r border-amber-400/20" />
+                    <div className="w-1.5 h-full bg-amber-400/20 border-l border-amber-400/20" />
+                  </div>
+                  <div className="w-full h-[1px] bg-amber-400/20" />
                 </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-500">SCORE REGISTERED</span>
-                  <span className="font-mono text-emerald-400 font-bold">{trustScore} / 1000</span>
+                {/* Contactless symbol */}
+                <svg className="w-4 h-4 text-slate-500/80 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+
+              {/* Card Body Data (Depth Pop) */}
+              <div 
+                className="pt-4 space-y-3 relative z-10"
+                style={{ transform: 'translateZ(15px)', transformStyle: 'preserve-3d' }}
+              >
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-400 font-medium">HOLDER ID</span>
+                  <span className="font-mono font-bold text-white text-[11px] bg-slate-950/60 px-2 py-0.5 rounded border border-white/5 shadow-inner">0x71C7...6E9a</span>
                 </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-500">TRUST TIER</span>
-                  <TrustTierBadge trustScore={trustScore} size="sm" />
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-400 font-medium">SCORE REGISTERED</span>
+                  <span className="font-mono text-emerald-400 font-bold text-sm bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 shadow-sm">{trustScore} <span className="text-slate-500 text-xs font-normal">/ 1000</span></span>
                 </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-500">BORROW APY</span>
-                  <span className={`font-mono font-bold ${currentTier ? currentTier.color.text : 'text-amber-400'}`}>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-400 font-medium">TRUST TIER</span>
+                  <div className="scale-95 origin-right">
+                    <TrustTierBadge trustScore={trustScore} size="sm" />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-400 font-medium">BORROW APY</span>
+                  <span className={`font-mono font-bold px-2 py-0.5 rounded bg-slate-950/40 border border-white/5 ${currentTier ? currentTier.color.text : 'text-amber-400'}`}>
                     {calculatedBorrowRate.toFixed(1)}%
                   </span>
                 </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-500">GRACE PERIOD</span>
-                  <span className="font-mono text-indigo-300 font-bold">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-400 font-medium">GRACE PERIOD</span>
+                  <span className="font-mono text-indigo-300 font-bold px-2 py-0.5 rounded bg-indigo-950/20 border border-indigo-500/10">
                     {currentTier ? `${currentTier.gracePeriodHours}h` : 'None'}
                   </span>
                 </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-500">VERIFIED ATTRIBUTES</span>
-                  <span className="text-slate-300 font-semibold">{credentials.filter((c) => c.active).length} of 5 Factors</span>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-400 font-medium">VERIFIED ATTRIBUTES</span>
+                  <span className="text-slate-200 font-semibold bg-slate-950/40 px-2 py-0.5 rounded border border-white/5">{credentials.filter((c) => c.active).length} of 5 Factors</span>
                 </div>
               </div>
             </div>
@@ -662,21 +758,29 @@ export default function BorrowPage() {
               <h3 className="font-display text-sm font-bold text-white uppercase tracking-wider">Credential Attestors &amp; Ledger Registry</h3>
               <div className="divide-y divide-white/5">
                 {[
-                  { name: 'Sovereign Beacon Bureau', cert: 'Equifax DID-Attest v2', validity: '365 Days Valid', status: 'Active' },
-                  { name: 'Coinbase Identity Registry', cert: 'Passport Verifiable Attestation', validity: 'Lifetime Valid', status: 'Active' },
-                  { name: 'Sovereign Bank Node Ledger', cert: 'Plaid Token Attestation v1', validity: '180 Days Valid', status: 'Active' },
-                ].map((att, idx) => (
-                  <div key={idx} className="flex justify-between items-center py-3 text-xs">
-                    <div>
-                      <p className="font-semibold text-white">{att.name}</p>
-                      <p className="text-[10px] text-slate-500 font-mono mt-0.5">{att.cert}</p>
+                  { id: 'credit_score', name: 'Sovereign Beacon Bureau', cert: 'Equifax DID-Attest v2', validity: '365 Days Valid' },
+                  { id: 'kyc', name: 'Coinbase Identity Registry', cert: 'Passport Verifiable Attestation', validity: 'Lifetime Valid' },
+                  { id: 'banking', name: 'Sovereign Bank Node Ledger', cert: 'Plaid Token Attestation v1', validity: '180 Days Valid' },
+                  { id: 'onchain', name: 'Solana Reputation Ledger', cert: 'Rialo/Aave History Attestation', validity: 'Lifetime Valid' },
+                  { id: 'consent', name: 'Decentralized Credit Consent Registry', cert: 'Equifax Credit Consent Certificate', validity: '365 Days Valid' },
+                ].map((att) => {
+                  const cred = credentials.find((c) => c.id === att.id);
+                  const isActive = cred?.active ?? false;
+                  return (
+                    <div key={att.id} className="flex justify-between items-center py-3 text-xs">
+                      <div>
+                        <p className="font-semibold text-white">{att.name}</p>
+                        <p className="text-[10px] text-slate-500 font-mono mt-0.5">{att.cert}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs font-semibold text-slate-300">{att.validity}</span>
+                        <span className={`block text-[10px] font-mono font-bold mt-0.5 ${isActive ? 'text-emerald-400' : 'text-slate-500'}`}>
+                          {isActive ? 'Active' : 'Not Verified'}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span className="text-xs font-semibold text-slate-300">{att.validity}</span>
-                      <span className="block text-[10px] font-mono text-indigo-400 font-bold mt-0.5">{att.status}</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Tier Progression */}

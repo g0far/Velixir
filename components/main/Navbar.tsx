@@ -17,6 +17,7 @@ const TABS = [
     { name: "Liquidity&Staking", href: "/liquidity" },
     { name: "Lending", href: "/lending" },
     { name: "Borrow", href: "/borrow" },
+    { name: "Reputation", href: "/borrow?tab=Reputation" },
     { name: "Portfolio", href: "/borrow?tab=Portfolio" },
     { name: "Project", href: "/project", isDropdown: true }
 ];

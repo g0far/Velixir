@@ -6,6 +6,7 @@ import VelixirFooter from "@/components/main/VelixirFooter";
 import { LENDING_POOLS, useLendingStore, computeSupplyAPY } from "@/lib/store/lendingStore";
 import { useBorrowStore } from "@/lib/store/borrowStore";
 import { useWalletStore } from "@/lib/store/walletStore";
+import { Position } from "@/lib/types/borrow";
 import { CryptoIcon } from "@/components/borrow/LendingSupplySection";
 import { BASE_SEPOLIA_CONFIG } from "@/constants/market";
 import { useOracleStore } from "@/lib/store/oracleStore";
@@ -161,7 +162,12 @@ export default function LiquidityPage() {
     () => (address ? positions[address.toLowerCase()] || [] : []),
     [positions, address]
   );
-  const borrowPositions = useBorrowStore((s) => s.positions);
+  
+  const [borrowPositions, setBorrowPositions] = useState<Position[]>([]);
+  const storeBorrowPositions = useBorrowStore((s) => s.positions);
+  useEffect(() => {
+    setBorrowPositions(storeBorrowPositions);
+  }, [storeBorrowPositions]);
 
   useEffect(() => {
     startOracle();
