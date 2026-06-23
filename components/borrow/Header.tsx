@@ -64,29 +64,33 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
   const recent = transactions.slice(0, 6);
 
   return (
-    <header className="border-b border-white/5 bg-slate-950/60 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-[1855px] mx-auto px-4 sm:px-10">
-        <div className="relative flex items-center justify-between h-20">
+    <header className="w-screen md:w-full h-[65px] fixed top-0 left-0 right-0 mx-auto shadow-lg shadow-black/20 bg-[#03001490] border-b border-white/10 backdrop-blur-md z-50 px-4 md:px-10 max-w-[1855px] flex items-center rounded-full">
+      <div className="relative w-full h-full flex flex-row items-center justify-between m-auto px-[0px] md:px-[10px]">
           {/* Logo Section */}
-          <a href="/" className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity shrink-0">
-            <div className="flex h-10 w-10 items-center justify-center drop-shadow-[0_0_12px_rgba(139,92,246,0.7)]">
-              <img src={logoUrl} alt="VELIXIR Logo" className="h-10 w-10 object-contain" />
-            </div>
+          <Link
+            href="/"
+            className="h-auto w-auto flex flex-row items-center cursor-pointer shrink-0"
+          >
+            <img
+              src={logoUrl}
+              alt="logo"
+              className="cursor-pointer hover:animate-spin w-10 mr-[10px]"
+            />
             <div className="flex flex-col justify-center leading-none select-none">
               <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-indigo-400 tracking-normal text-lg leading-none">
                 VELIXIR
               </span>
-              <div className="text-[7.5px] font-semibold text-indigo-300/80 tracking-[0.12em] uppercase mt-[2px] whitespace-nowrap">
+              <span className="text-[7.5px] font-semibold text-indigo-300/80 tracking-[0.12em] uppercase mt-[2px] whitespace-nowrap">
                 REPUTATION FINANCE
-              </div>
+              </span>
             </div>
-          </a>
+          </Link>
 
           {/* Navigation Links */}
           <div className="hidden lg:flex lg:absolute lg:left-1/2 lg:-translate-x-1/2">
             <nav
               ref={navRef}
-              className="flex relative space-x-1 bg-white/5 p-1.5 rounded-xl border border-white/5"
+              className="flex relative space-x-1 bg-black/40 p-1.5 rounded-xl border border-white/10"
             >
               {/* Sliding purple indicator */}
               <div
@@ -94,14 +98,17 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
                   position: 'absolute',
                   top: 6,
                   bottom: 6,
-                  left: sliderStyle.left,
+                  left: 0,
                   width: sliderStyle.width,
-                  transition: 'left 0.28s cubic-bezier(0.4,0,0.2,1), width 0.28s cubic-bezier(0.4,0,0.2,1)',
-                  background: 'linear-gradient(to right, rgba(124,58,237,0.9), rgba(99,102,241,0.9))',
+                  transform: `translateX(${sliderStyle.left}px)`,
+                  transition: 'transform 0.28s cubic-bezier(0.4,0,0.2,1), width 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease',
+                  willChange: 'transform',
+                  background: 'linear-gradient(to right, #7c3aed, #6366f1)',
                   borderRadius: 8,
-                  boxShadow: '0 4px 14px 0 rgba(99,102,241,0.2)',
+                  boxShadow: '0 4px 14px 0 rgba(124, 58, 237, 0.4)',
                   pointerEvents: 'none',
                   zIndex: 0,
+                  opacity: sliderStyle.width > 0 ? 1 : 0,
                 }}
               />
               {tabs.map((tab, idx) => {
@@ -121,10 +128,10 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
                       key={tab}
                       ref={(el) => { btnRefs.current[idx] = el as unknown as HTMLAnchorElement; }}
                       href={href}
-                      className={`relative z-10 px-4 py-2 text-xs font-medium rounded-lg transition-colors duration-200 flex items-center justify-center cursor-pointer ${
+                      className={`relative z-10 px-4 py-2 text-xs font-bold rounded-lg transition-colors duration-200 flex items-center justify-center cursor-pointer ${
                         activeTab === tab
-                          ? 'text-white'
-                          : 'text-slate-400 hover:text-white'
+                          ? 'text-white font-extrabold'
+                          : 'text-slate-200 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]'
                       }`}
                     >
                       {tab === 'Borrow' && (
@@ -144,10 +151,10 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
                     key={tab}
                     ref={(el) => { btnRefs.current[idx] = el; }}
                     onClick={() => setActiveTab?.(tab)}
-                    className={`relative z-10 px-4 py-2 text-xs font-medium rounded-lg transition-colors duration-200 ${
+                    className={`relative z-10 px-4 py-2 text-xs font-bold rounded-lg transition-colors duration-200 cursor-pointer ${
                       activeTab === tab
-                        ? 'text-white'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'text-white font-extrabold'
+                        : 'text-slate-200 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]'
                     }`}
                   >
                     {tab === 'Borrow' && (
@@ -414,7 +421,6 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
               })}
             </div>
           )}
-        </div>
       </div>
     </header>
   );

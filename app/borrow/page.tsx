@@ -461,7 +461,7 @@ export default function BorrowPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#030014]/60 to-[#030014] z-10" />
       </div>
 
-      <div className="relative z-10 flex flex-col flex-1 w-full">
+      <div className="relative z-10 flex flex-col flex-1 w-full pt-[100px]">
         {mounted && showSplash && <SplashScreen onFinish={handleSplashFinish} />}
         {/* Dynamic Header */}
         <Header activeTab={activeNavigation} setActiveTab={setActiveNavigation} />
