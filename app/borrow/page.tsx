@@ -593,10 +593,10 @@ export default function BorrowPage() {
           {/* Metrics Panel Row — only on Reputation Borrow tab */}
           <Metrics
             score={trustScore}
-            borrowPower={Math.round(computeMaxBorrowLTV(trustScore) * 100)}
+            borrowPower={connected ? Math.round(computeMaxBorrowLTV(trustScore) * 100) : 0}
             credentials={credentials}
             activeReductionSum={activeReductionSum}
-            trustStrength={Math.min(100, Math.round(60 + (activeReductionSum / 0.30) * 40))}
+            trustStrength={connected ? Math.min(100, Math.round(60 + (activeReductionSum / 0.30) * 40)) : 0}
           />
 
           {/* Two-Column Work Grid */}

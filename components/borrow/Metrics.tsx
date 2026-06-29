@@ -3,6 +3,7 @@ import { Award, Zap, CheckCircle2, Share2 } from 'lucide-react';
 import { TrustTierBadge } from './TrustTierBadge';
 
 import { CredentialCard } from '@/lib/types/borrow';
+import { useWalletStore } from '@/lib/store/walletStore';
 import CollateralReductionBreakdown from './CollateralReductionBreakdown';
 
 interface MetricsProps {
@@ -103,6 +104,8 @@ const MiniatureSpeedometer = ({ value }: { value: number }) => {
 };
 
 export default function Metrics({ score, borrowPower, credentials, activeReductionSum, trustStrength }: MetricsProps) {
+  const connected = useWalletStore((s) => s.connected);
+
   // Generate random connecting paths for trust nodes once or with relative positions
   const nodes = useMemo(() => [
     { id: 1, x: 25, y: 35, r: 4 },
@@ -122,6 +125,7 @@ export default function Metrics({ score, borrowPower, credentials, activeReducti
 
   // Rating label based on numeric score
   const getReputationLabel = (val: number) => {
+    if (!connected) return 'No wallet connected';
     if (val >= 850) return 'Excellent Borrower';
     if (val >= 750) return 'Very Good Borrower';
     if (val >= 600) return 'Good Borrower';
@@ -129,6 +133,7 @@ export default function Metrics({ score, borrowPower, credentials, activeReducti
   };
 
   const getPowerLabel = (power: number) => {
+    if (!connected) return 'No Wallet';
     if (power >= 100) return 'Elite';
     if (power >= 90) return 'Strong';
     if (power >= 73) return 'Standard';
@@ -177,9 +182,15 @@ export default function Metrics({ score, borrowPower, credentials, activeReducti
         </div>
         <div className="flex justify-between items-start mb-2">
           <span className="text-xs uppercase tracking-wider font-semibold text-slate-400">COLLATERAL TRUST INDEX</span>
-          <span className="text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/10">
-            Reputation Active
-          </span>
+          {connected ? (
+            <span className="text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/10">
+              Reputation Active
+            </span>
+          ) : (
+            <span className="text-[10px] font-mono font-bold bg-slate-500/15 text-slate-400 px-2 py-0.5 rounded-full border border-slate-500/10">
+              Reputation Inactive
+            </span>
+          )}
         </div>
         
         {/* Gauge Chart Layout */}
@@ -187,7 +198,7 @@ export default function Metrics({ score, borrowPower, credentials, activeReducti
           <MiniatureSpeedometer value={borrowPower} />
           <div>
             <div className="text-xl font-bold font-display text-white">{borrowPower}% <span className="text-xs text-slate-500 font-normal">/ 110%</span></div>
-            <p className="text-xs text-emerald-400 font-medium mt-1">{getPowerLabel(borrowPower)} Rating</p>
+            <p className={`text-xs font-medium mt-1 ${connected ? 'text-emerald-400' : 'text-slate-400'}`}>{getPowerLabel(borrowPower)} Rating</p>
             <p className="text-[10px] text-slate-500 mt-1">Reflects collateral requirements advantage</p>
           </div>
         </div>

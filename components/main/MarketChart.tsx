@@ -12,7 +12,7 @@ import {
   type UTCTimestamp,
 } from "lightweight-charts";
 import { MarketToken } from "@/constants/market";
-import { ChartRange, CHART_RANGES, fetchCandles } from "@/lib/baseSepolia";
+import { ChartRange, CHART_RANGES, fetchCandles } from "@/lib/solanaDevnet";
 
 interface MarketChartProps {
   token: MarketToken;
