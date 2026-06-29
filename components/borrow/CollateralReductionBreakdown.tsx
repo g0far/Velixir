@@ -4,15 +4,20 @@ import { CredentialCard } from '@/lib/types/borrow';
 interface CollateralReductionBreakdownProps {
   credentials: CredentialCard[];
   totalReductionPercent: number; // e.g. 30 (represented out of 100)
+  scaleFactor?: number;
 }
 
 export default function CollateralReductionBreakdown({
   credentials,
   totalReductionPercent,
+  scaleFactor = 1,
 }: CollateralReductionBreakdownProps) {
   // Compute active slices
   const activeSlices = credentials.filter(cred => cred.active);
-  const totalWeight = activeSlices.reduce((sum, c) => sum + c.reductionValue, 0);
+  const totalWeight = activeSlices.reduce((sum, c) => sum + c.reductionValue * scaleFactor, 0);
+  const maxBoost = 0.30 * scaleFactor;
+
+  const formatPct = (val: number) => (val * 100).toFixed(val * 100 % 1 === 0 ? 0 : 1);
 
   // Define color mapping for each card key
   const colors: Record<string, string> = {
@@ -77,12 +82,9 @@ export default function CollateralReductionBreakdown({
             {/* Render dynamic segments */}
             {activeSlices.map((cred) => {
               // Share of this credential relative to total reductions (or just absolute values)
-              // Let's make it absolute out of 100% total possible sum of 50.
-              const sliceWeight = cred.reductionValue; // e.g. 0.15
-              const slicePercentage = (sliceWeight / 0.30) * 100; // Fraction of 30% max possible
-              
-              const strokeLength = (sliceWeight / 0.30) * circumference;
-              const strokeOffset = circumference - (accumulatedPercent / 30) * circumference;
+              const sliceWeight = cred.reductionValue * scaleFactor;
+              const strokeLength = (sliceWeight / maxBoost) * circumference;
+              const strokeOffset = circumference - (accumulatedPercent / (maxBoost * 100)) * circumference;
               
               // Increment accumulated
               accumulatedPercent += sliceWeight * 100; // percent of total
@@ -130,7 +132,7 @@ export default function CollateralReductionBreakdown({
                 <span className="text-slate-300 font-medium">{cred.title}</span>
               </div>
               <span className={`font-mono font-bold ${cred.active ? textColors[cred.id] : 'text-slate-500'}`}>
-                {cred.active ? `-${cred.reductionValue * 100}%` : '0%'}
+                {cred.active ? `-${formatPct(cred.reductionValue * scaleFactor)}%` : '0%'}
               </span>
             </div>
           ))}

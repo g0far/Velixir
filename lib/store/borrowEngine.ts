@@ -40,8 +40,11 @@ export interface LendingEngine {
   trustScore: number,
   isReputationMode: boolean,
   collateralPrice: number,
-  reductionSum: number
+  reductionSum: number,
+  customLTV?: number
 ): LendingEngine {
+  const baseLtv = customLTV !== undefined ? customLTV : STANDARD_BORROW_LTV;
+
   // Collateral-ratio reduction is driven by the active credentials' reductionValue
   // sum (NOT the trust score), so tier/score and capital-efficiency stay independent
   // and the displayed total always equals the sum of the per-credential badges.
@@ -56,8 +59,8 @@ export interface LendingEngine {
   // Borrow capacities — single source of truth shared with the active-position
   // store (computeMaxBorrowCapacity / STANDARD_BORROW_LTV), so the borrow preview
   // and the live position panel always report the same max-borrow numbers.
-  const standardCapacity = currentCollateralValue * STANDARD_BORROW_LTV;
-  const reputationCapacity = computeMaxBorrowCapacity(currentCollateralValue, trustScore);
+  const standardCapacity = currentCollateralValue * baseLtv;
+  const reputationCapacity = computeMaxBorrowCapacity(currentCollateralValue, trustScore, baseLtv);
 
   // Max Borrow Capacity based on current mode
   const maxBorrowCapacity = isReputationMode ? reputationCapacity : standardCapacity;
@@ -94,7 +97,7 @@ export interface LendingEngine {
   const ltv = currentCollateralValue > 0 ? (actualBorrow / currentCollateralValue) * 100 : 0;
 
   // Safe Liquidation Threshold
-  const elt = computeELT(trustScore);
+  const elt = computeELT(trustScore, baseLtv);
 
   // Borrow Health (only valid when position passes collateral check)
   const borrowHealth = (isValid && actualBorrow > 0)

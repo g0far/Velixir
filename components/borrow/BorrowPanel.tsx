@@ -4,7 +4,7 @@ import { Asset } from '@/lib/types/borrow';
 import { useWalletStore, BASE_SEPOLIA_CHAIN_ID } from '@/lib/store/walletStore';
 import { useBalanceStore } from '@/lib/store/balanceStore';
 import { toast } from '@/lib/store/toastStore';
-import { computeELT, borrowHealthStatus, getTrustTier, computeTierAPY, computeGracePeriodHours, BASE_INTEREST_RATE } from '@/lib/store/trustStore';
+import { computeELT, borrowHealthStatus, getTrustTier, computeTierAPY, computeGracePeriodHours, BASE_INTEREST_RATE, computeMaxBorrowLTV } from '@/lib/store/trustStore';
 import { TrustTierBadge } from './TrustTierBadge';
 import { TokenLogo, ASSET_METADATA } from '@/lib/store/assetMetadata';
 import { LendingEngine } from '@/lib/store/borrowEngine';
@@ -215,7 +215,11 @@ export default function BorrowPanel({
                     <span className="text-sm font-extrabold text-white leading-none">
                       {selectedCollateralAsset.symbol}
                     </span>
-                    <span className="text-[8px] text-slate-400 uppercase tracking-wider font-mono mt-1 leading-none">Collateral Asset</span>
+                    <span className="text-[8px] text-slate-400 uppercase tracking-wider font-mono mt-1 leading-none">
+                      {isReputationMode
+                        ? `LTV: ${Math.round(selectedCollateralAsset.standardLTV * 100)}% → ${Math.round(computeMaxBorrowLTV(trustScore, selectedCollateralAsset.standardLTV) * 100)}%`
+                        : `LTV: ${Math.round(selectedCollateralAsset.standardLTV * 100)}%`}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -236,30 +240,41 @@ export default function BorrowPanel({
                   </svg>
                 </div>
               </button>
-
+ 
               {collateralDropdownOpen && (
                 <div className="absolute left-0 right-0 mt-2 rounded-2xl bg-slate-950 border border-white/10 shadow-2xl p-1.5 z-50 backdrop-blur-xl space-y-1">
-                  {collateralAssets.map((asset) => (
-                    <button
-                      key={asset.id}
-                      type="button"
-                      onClick={() => {
-                        setActiveCollateral(asset.symbol);
-                        setCollateralDropdownOpen(false);
-                      }}
-                      className={`w-full py-2.5 px-3.5 rounded-xl text-left transition-all cursor-pointer flex items-center justify-between text-xs ${
-                        activeCollateral === asset.symbol
-                          ? 'bg-indigo-600/20 text-white font-bold'
-                          : 'text-slate-450 hover:text-white hover:bg-white/5'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <TokenLogo symbol={asset.symbol} size={22} />
-                        <span>{asset.symbol}</span>
-                      </div>
-                      <span className="font-mono text-slate-400">${asset.price.toLocaleString()}</span>
-                    </button>
-                  ))}
+                  {collateralAssets.map((asset) => {
+                    const baseLTV = Math.round(asset.standardLTV * 100);
+                    const repLTV = Math.round(computeMaxBorrowLTV(trustScore, asset.standardLTV) * 100);
+                    return (
+                      <button
+                        key={asset.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveCollateral(asset.symbol);
+                          setCollateralDropdownOpen(false);
+                        }}
+                        className={`w-full py-2.5 px-3.5 rounded-xl text-left transition-all cursor-pointer flex items-center justify-between text-xs ${
+                          activeCollateral === asset.symbol
+                            ? 'bg-indigo-600/20 text-white font-bold'
+                            : 'text-slate-455 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <TokenLogo symbol={asset.symbol} size={22} />
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-white">{asset.symbol}</span>
+                            <span className="text-[8px] text-slate-400 uppercase tracking-wider font-mono mt-1 leading-none">
+                              {isReputationMode
+                                ? `LTV: ${baseLTV}% → ${repLTV}%`
+                                : `LTV: ${baseLTV}%`}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="font-mono text-slate-450">${asset.price.toLocaleString()}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>

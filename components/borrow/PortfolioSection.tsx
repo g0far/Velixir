@@ -57,10 +57,10 @@ export default function PortfolioSection() {
   const priceOf = (symbol: string, fallback: number) => prices[symbol]?.price ?? fallback;
 
   const collateralAssets = useMemo(() => [
-    { id: "sol", symbol: "SOL", name: "Solana", price: priceOf("SOL", 152.4), icon: "sol", standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.035 },
-    { id: "btc", symbol: "BTC", name: "Bitcoin", price: priceOf("BTC", 95000), icon: "btc", standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.012 },
-    { id: "rialo", symbol: "RLO", name: "Rialo", price: priceOf("RLO", 1), icon: "rialo", standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.145 },
-    { id: "usdc_col", symbol: "USDC", name: "USD Coin", price: priceOf("USDC", 1.00), icon: "usdc", standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.048 },
+    { id: "sol", symbol: "SOL", name: "Solana", price: priceOf("SOL", 152.4), icon: "sol", standardLTV: 0.75, liquidationThreshold: 0.80, apy: 0.035 },
+    { id: "btc", symbol: "BTC", name: "Bitcoin", price: priceOf("BTC", 95000), icon: "btc", standardLTV: 0.75, liquidationThreshold: 0.80, apy: 0.012 },
+    { id: "rialo", symbol: "RLO", name: "Rialo", price: priceOf("RLO", 1), icon: "rialo", standardLTV: 0.80, liquidationThreshold: 0.85, apy: 0.145 },
+    { id: "usdc_col", symbol: "USDC", name: "USD Coin", price: priceOf("USDC", 1.00), icon: "usdc", standardLTV: 0.85, liquidationThreshold: 0.90, apy: 0.048 },
   ], [prices]);
 
   const livePositions = positions;

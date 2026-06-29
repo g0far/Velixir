@@ -232,17 +232,25 @@ export default function BorrowPage() {
 
   // Asset metadata merged with live oracle prices
   const collateralAssets: Asset[] = useMemo(() => [
-    { id: 'sol', symbol: 'SOL', name: 'Solana', price: priceOf('SOL', 152.4), icon: 'sol', standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.035 },
-    { id: 'btc', symbol: 'BTC', name: 'Bitcoin', price: priceOf('BTC', 95000), icon: 'btc', standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.012 },
-    { id: 'rialo', symbol: 'RLO', name: 'Rialo', price: priceOf('RLO', 1), icon: 'rialo', standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.145 },
-    { id: 'usdc_col', symbol: 'USDC', name: 'USD Coin', price: priceOf('USDC', 1.00), icon: 'usdc', standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.048 },
-    { id: 'usdt_col', symbol: 'USDT', name: 'Tether USD', price: priceOf('USDT', 1.00), icon: 'usdt', standardLTV: STANDARD_BORROW_LTV, liquidationThreshold: 0.85, apy: 0.048 },
+    { id: 'sol', symbol: 'SOL', name: 'Solana', price: priceOf('SOL', 152.4), icon: 'sol', standardLTV: 0.75, liquidationThreshold: 0.80, apy: 0.035 },
+    { id: 'btc', symbol: 'BTC', name: 'Bitcoin', price: priceOf('BTC', 95000), icon: 'btc', standardLTV: 0.75, liquidationThreshold: 0.80, apy: 0.012 },
+    { id: 'rialo', symbol: 'RLO', name: 'Rialo', price: priceOf('RLO', 1), icon: 'rialo', standardLTV: 0.80, liquidationThreshold: 0.85, apy: 0.145 },
+    { id: 'usdc_col', symbol: 'USDC', name: 'USD Coin', price: priceOf('USDC', 1.00), icon: 'usdc', standardLTV: 0.85, liquidationThreshold: 0.90, apy: 0.048 },
+    { id: 'usdt_col', symbol: 'USDT', name: 'Tether USD', price: priceOf('USDT', 1.00), icon: 'usdt', standardLTV: 0.85, liquidationThreshold: 0.90, apy: 0.048 },
   ], [prices]);
 
   const borrowAssets = useMemo(() => [
     { symbol: 'USDC', name: 'USD Coin', isStable: true },
     { symbol: 'USDT', name: 'Tether USD', isStable: true },
   ], []);
+
+  // ---- Collateral / capacity math ----
+  const currentCollateralAsset = useMemo(
+    () => collateralAssets.find((a) => a.symbol === activeCollateral) || collateralAssets[0],
+    [activeCollateral, collateralAssets]
+  );
+
+  const collateralPrice = currentCollateralAsset.price;
 
   // ---- Trust Credentials Engine derivations ----
   const connected = useWalletStore((s) => s.connected);
@@ -251,8 +259,10 @@ export default function BorrowPage() {
   const wrongNetwork = useWalletStore((s) => s.isWrongNetwork());
   const activeReductionSum = useMemo(() => {
     if (!connected) return 0;
-    return selectReductionSum(credentials, isReputationMode);
-  }, [credentials, isReputationMode, connected]);
+    const rawSum = selectReductionSum(credentials, isReputationMode);
+    const maxBoost = currentCollateralAsset.standardLTV === 0.85 ? 0.25 : 0.30;
+    return rawSum * (maxBoost / 0.30);
+  }, [credentials, isReputationMode, connected, currentCollateralAsset]);
 
   const trustScore = useMemo(() => {
     if (!connected) return 0;
@@ -266,14 +276,6 @@ export default function BorrowPage() {
   }, [trustScore, isReputationMode]);
   const currentTier = useMemo(() => isReputationMode ? getTrustTier(trustScore) : null, [trustScore, isReputationMode]);
 
-  // ---- Collateral / capacity math ----
-  const currentCollateralAsset = useMemo(
-    () => collateralAssets.find((a) => a.symbol === activeCollateral) || collateralAssets[0],
-    [activeCollateral, collateralAssets]
-  );
-
-  const collateralPrice = currentCollateralAsset.price;
-
   const engine = useMemo(() => {
     return computeLendingEngine(
       Number(collateralAmount) || 0,
@@ -281,9 +283,10 @@ export default function BorrowPage() {
       trustScore,
       isReputationMode,
       collateralPrice,
-      activeReductionSum
+      activeReductionSum,
+      currentCollateralAsset.standardLTV
     );
-  }, [collateralAmount, borrowAmount, trustScore, isReputationMode, collateralPrice, activeReductionSum]);
+  }, [collateralAmount, borrowAmount, trustScore, isReputationMode, collateralPrice, activeReductionSum, currentCollateralAsset]);
 
 
 
@@ -593,10 +596,17 @@ export default function BorrowPage() {
           {/* Metrics Panel Row — only on Reputation Borrow tab */}
           <Metrics
             score={trustScore}
-            borrowPower={connected ? Math.round(computeMaxBorrowLTV(trustScore) * 100) : 0}
+            borrowPower={
+              !connected
+                ? 0
+                : isReputationMode
+                  ? Math.round(computeMaxBorrowLTV(trustScore, currentCollateralAsset.standardLTV) * 100)
+                  : Math.round(currentCollateralAsset.standardLTV * 100)
+            }
             credentials={credentials}
             activeReductionSum={activeReductionSum}
-            trustStrength={connected ? Math.min(100, Math.round(60 + (activeReductionSum / 0.30) * 40)) : 0}
+            trustStrength={connected ? Math.min(100, Math.round(60 + (activeReductionSum / (currentCollateralAsset.standardLTV === 0.85 ? 0.25 : 0.30)) * 40)) : 0}
+            scaleFactor={(currentCollateralAsset.standardLTV === 0.85 ? 0.25 : 0.30) / 0.30}
           />
 
           {/* Two-Column Work Grid */}
@@ -611,6 +621,7 @@ export default function BorrowPage() {
                 connected={connected}
                 trustScore={trustScore}
                 wrongNetwork={wrongNetwork}
+                scaleFactor={(currentCollateralAsset.standardLTV === 0.85 ? 0.25 : 0.30) / 0.30}
               />
 
               <ReputationEngineFormula
@@ -618,6 +629,7 @@ export default function BorrowPage() {
                 score={trustScore}
                 isReputationMode={isReputationMode}
                 totalReduction={engine.reduction}
+                baseLTV={currentCollateralAsset.standardLTV}
               />
 
               <RequiredCollateralSummary

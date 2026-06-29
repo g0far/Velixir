@@ -6,6 +6,7 @@ interface ReputationEngineFormulaProps {
   score: number;                 // current reputation score e.g. 865
   isReputationMode: boolean;
   totalReduction: number;        // e.g. 0.30
+  baseLTV?: number;
 }
 
 export default function ReputationEngineFormula({
@@ -13,22 +14,23 @@ export default function ReputationEngineFormula({
   score,
   isReputationMode,
   totalReduction,
+  baseLTV: baseLTVProp,
 }: ReputationEngineFormulaProps) {
   const [isOpen, setIsOpen] = useState(true);
 
   // Compute live breakdown segments aligning to the "Unlock Borrowing Power Up To 110%" narrative.
-  // 1) Base collateral capability: Collateral * Standard LTV (80% — traditional baseline)
-  const baseLTV = 0.80;
+  // 1) Base collateral capability: Collateral * Standard LTV
+  const baseLTV = baseLTVProp !== undefined ? baseLTVProp : 0.80;
   const baseCollateralCap = collateralValue * baseLTV;
 
-  // 2) Max reputation boost is 30% LTV (totaling 110% LTV).
+  // 2) Max reputation boost is capped at 110% LTV total.
   // This is split into:
-  // - Credential Bonus (up to 10% LTV, proportional to totalReduction / 0.30)
-  // - Score Boost (up to 20% LTV, taking the rest of the reputation score leverage)
-  const maxReputationLTVBoost = 0.30;
+  // - Credential Bonus (up to 1/3 of boost, proportional to totalReduction)
+  // - Score Boost (up to 2/3 of boost, taking the rest of the reputation score leverage)
+  const maxReputationLTVBoost = 1.10 - baseLTV;
   const totalLTVBoost = isReputationMode ? maxReputationLTVBoost * ((score - 300) / 700) : 0;
 
-  const credentialLTVBoost = isReputationMode ? 0.10 * (totalReduction / 0.30) : 0;
+  const credentialLTVBoost = isReputationMode ? totalReduction / 3 : 0;
   const scoreLTVBoost = Math.max(0, totalLTVBoost - credentialLTVBoost);
 
   // Values in USD
@@ -36,6 +38,9 @@ export default function ReputationEngineFormula({
   const credentialBonusUSD = collateralValue * credentialLTVBoost;
   const totalBorrowPower = baseCollateralCap + scoreBoostUSD + credentialBonusUSD;
   const totalLTVPercent = (baseLTV + scoreLTVBoost + credentialLTVBoost) * 100;
+
+  const maxScoreBoostPct = Math.round((maxReputationLTVBoost * 2 / 3) * 100);
+  const maxCredBoostPct = Math.round((maxReputationLTVBoost * 1 / 3) * 100);
 
   return (
     <div className="bg-slate-900/60 border border-white/5 rounded-2xl overflow-hidden backdrop-blur-sm shadow-xl transition-all">
@@ -53,7 +58,7 @@ export default function ReputationEngineFormula({
               Velixir Reputation Engine
             </h3>
             <p className="text-[10px] text-slate-500 font-mono">
-              Formula: Borrow Power = Standart Cap (80% LTV) + Score Boost (up to +20%) + Credential Bonus (up to +10%)
+              Formula: Borrow Power = Standard Cap ({Math.round(baseLTV * 100)}% LTV) + Score Boost (up to +{maxScoreBoostPct}%) + Credential Bonus (up to +{maxCredBoostPct}%)
             </p>
           </div>
         </div>
@@ -72,7 +77,7 @@ export default function ReputationEngineFormula({
             {/* Formula Block visualization */}
             <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-950/80 px-6 py-4.5 rounded-xl border border-white/5 mt-3 font-mono">
               <div className="text-center flex-1">
-                <div className="text-[10px] text-slate-500 uppercase font-sans font-semibold tracking-wider">Standart Cap (80% LTV)</div>
+                <div className="text-[10px] text-slate-500 uppercase font-sans font-semibold tracking-wider">Standard Cap ({Math.round(baseLTV * 100)}% LTV)</div>
                 <div className="text-sm font-extrabold text-slate-300 mt-1">
                   ${baseCollateralCap.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </div>

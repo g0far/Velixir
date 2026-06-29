@@ -476,19 +476,20 @@ export function trustScoreLabel(score: number): string {
 // Standard (traditional) max borrow = 80% of collateral — no reputation required
 export const STANDARD_BORROW_LTV = 0.80;
 
-export function computeMaxBorrowLTV(trustScore: number): number {
+export function computeMaxBorrowLTV(trustScore: number, baseLTV: number = 0.80): number {
   const score = Math.max(300, Math.min(1000, trustScore));
-  return 0.80 + 0.30 * ((score - 300) / 700);
+  const maxBoost = baseLTV === 0.85 ? 0.25 : 0.30;
+  return baseLTV + maxBoost * ((score - 300) / 700);
 }
 
-export function computeELT(trustScore: number): number {
-  return computeMaxBorrowLTV(trustScore) + 0.05;
+export function computeELT(trustScore: number, baseLTV: number = 0.80): number {
+  return computeMaxBorrowLTV(trustScore, baseLTV) + 0.05;
 }
 
 // MarketHealth = (Collateral × 0.80) / Debt  — reputation-blind baseline
-export function computeMarketHealth(collateral: number, debt: number): number {
+export function computeMarketHealth(collateral: number, debt: number, baseLTV: number = 0.80): number {
   if (debt <= 0) return Infinity;
-  return (collateral * STANDARD_BORROW_LTV) / debt;
+  return (collateral * baseLTV) / debt;
 }
 
 // ReputationHealth = TrustScore / 1000 (as a 0-100 percentage)
@@ -497,9 +498,9 @@ export function computeReputationHealth(trustScore: number): number {
 }
 
 // BorrowHealth = (Collateral × ELT) / Debt  — true position safety
-export function computeBorrowHealth(collateral: number, debt: number, trustScore: number): number {
+export function computeBorrowHealth(collateral: number, debt: number, trustScore: number, baseLTV: number = 0.80): number {
   if (debt <= 0) return Infinity;
-  const elt = computeELT(trustScore);
+  const elt = computeELT(trustScore, baseLTV);
   return (collateral * elt) / debt;
 }
 
@@ -526,7 +527,6 @@ export function daysElapsed(fromTimestamp: number): number {
 }
 
 // Compute max borrowing capacity for a given collateral value and trust score
-export function computeMaxBorrowCapacity(collateralValue: number, trustScore: number): number {
-  return collateralValue * computeMaxBorrowLTV(trustScore);
+export function computeMaxBorrowCapacity(collateralValue: number, trustScore: number, baseLTV: number = 0.80): number {
+  return collateralValue * computeMaxBorrowLTV(trustScore, baseLTV);
 }
-

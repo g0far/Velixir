@@ -33,9 +33,17 @@ function recompute(p: Position, price: number): Position {
   const totalDebt = p.borrowAmount + accruedInterest;
   const ltv = collateralValue > 0 ? (totalDebt / collateralValue) * 100 : 0;
   const trustScore = p.trustScore ?? 500;
-  const elt = computeELT(trustScore);
-  const maxCapacity = computeMaxBorrowCapacity(collateralValue, trustScore);
-  const borrowHealth = computeBorrowHealth(collateralValue, totalDebt, trustScore);
+
+  // Asset-specific LTV base mapping
+  const baseLTV = p.collateralAsset === 'USDC' || p.collateralAsset === 'USDT'
+    ? 0.85
+    : p.collateralAsset === 'RLO'
+      ? 0.80
+      : 0.75; // SOL/BTC defaults to 75%
+
+  const elt = computeELT(trustScore, baseLTV);
+  const maxCapacity = computeMaxBorrowCapacity(collateralValue, trustScore, baseLTV);
+  const borrowHealth = computeBorrowHealth(collateralValue, totalDebt, trustScore, baseLTV);
 
   // Margin Call: totalDebt exceeds allowed capacity but position not yet liquidatable
   const marginCall = totalDebt > maxCapacity && borrowHealth >= 1.0;
@@ -130,7 +138,15 @@ export const useBorrowStore = create<BorrowState>()(
         const now = Date.now();
         const trustScore = input.trustScore;
         const collateralValue = input.collateralAmount; // will be recomputed on first price tick
-        const maxCapacity = computeMaxBorrowCapacity(collateralValue, trustScore);
+
+        // Asset-specific LTV base mapping
+        const baseLTV = input.collateralAsset === 'USDC' || input.collateralAsset === 'USDT'
+          ? 0.85
+          : input.collateralAsset === 'RLO'
+            ? 0.80
+            : 0.75; // SOL/BTC defaults to 75%
+
+        const maxCapacity = computeMaxBorrowCapacity(collateralValue, trustScore, baseLTV);
         const marginCall = input.borrowAmount > maxCapacity && input.healthFactor >= 1.0;
         const tier = getTrustTier(trustScore);
         const tierAPY = computeTierAPY(trustScore);

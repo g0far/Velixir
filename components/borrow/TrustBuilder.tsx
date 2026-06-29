@@ -12,9 +12,11 @@ interface TrustBuilderProps {
   connected?: boolean;
   trustScore?: number;
   wrongNetwork?: boolean;
+  scaleFactor?: number;
 }
 
-export default function TrustBuilder({ credentials, onToggle, totalReduction, collateralSaved, collateralRatio, connected = true, trustScore = 0, wrongNetwork = false }: TrustBuilderProps) {
+export default function TrustBuilder({ credentials, onToggle, totalReduction, collateralSaved, collateralRatio, connected = true, trustScore = 0, wrongNetwork = false, scaleFactor = 1 }: TrustBuilderProps) {
+  const formatPct = (val: number) => (val * 100).toFixed(val * 100 % 1 === 0 ? 0 : 1);
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
   const [zkLogs, setZkLogs] = useState<string[]>([]);
   const [zkProgress, setZkProgress] = useState(0);
@@ -255,7 +257,7 @@ export default function TrustBuilder({ credentials, onToggle, totalReduction, co
                         {isActive ? cred.status : 'Inactive'}
                       </span>
                       <span className="text-[9px] text-emerald-400 font-mono">
-                        -{cred.reductionValue * 100}% Collateral Ratio
+                        -{formatPct(cred.reductionValue * scaleFactor)}% Collateral Ratio
                       </span>
                     </div>
                   </div>
@@ -439,7 +441,7 @@ export default function TrustBuilder({ credentials, onToggle, totalReduction, co
                   </div>
                   <div className="text-right">
                     <div className="text-xs font-mono font-bold text-emerald-400">
-                      {scanStatus === 'revoking' ? '0.00%' : `-${activeCred.reductionValue * 100}%`}
+                      {scanStatus === 'revoking' ? '0.00%' : `-${formatPct(activeCred.reductionValue * scaleFactor)}%`}
                     </div>
                     <span className="text-[8px] text-slate-550 font-mono">COLLATERAL RATIO</span>
                   </div>

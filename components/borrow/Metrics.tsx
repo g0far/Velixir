@@ -12,6 +12,7 @@ interface MetricsProps {
   credentials: CredentialCard[];
   activeReductionSum: number;
   trustStrength: number; // dynamic trust strength
+  scaleFactor?: number;
 }
 
 const MiniatureSpeedometer = ({ value }: { value: number }) => {
@@ -103,7 +104,7 @@ const MiniatureSpeedometer = ({ value }: { value: number }) => {
   );
 };
 
-export default function Metrics({ score, borrowPower, credentials, activeReductionSum, trustStrength }: MetricsProps) {
+export default function Metrics({ score, borrowPower, credentials, activeReductionSum, trustStrength, scaleFactor = 1 }: MetricsProps) {
   const connected = useWalletStore((s) => s.connected);
 
   // Generate random connecting paths for trust nodes once or with relative positions
@@ -208,6 +209,7 @@ export default function Metrics({ score, borrowPower, credentials, activeReducti
       <CollateralReductionBreakdown
         credentials={credentials}
         totalReductionPercent={activeReductionSum * 100}
+        scaleFactor={scaleFactor}
       />
 
 
