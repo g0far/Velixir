@@ -13,7 +13,7 @@ interface HeaderProps {
   setActiveTab?: (tab: string) => void;
 }
 
-const logoUrl = '/favicon.png';
+const logoUrl = '/favicon.webp';
 
 export default function Header({ activeTab, setActiveTab }: HeaderProps) {
   const {

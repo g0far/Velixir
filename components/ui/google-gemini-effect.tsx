@@ -32,7 +32,7 @@ export const GoogleGeminiEffect = ({
       <div className="w-full h-[890px] -top-60 md:-top-40 flex items-center justify-center absolute pointer-events-none">
         <div className="md:mt-24 mt-8 z-30 bg-[#030014] border border-[#1f1b2d] rounded-full pointer-events-auto flex items-center justify-center shadow-2xl overflow-hidden">
           <img 
-            src="/logo velixir 2.png" 
+            src="/logo velixir 2.webp" 
             alt="Velixir Logo" 
             className="-my-6 -mx-3 md:-my-11 md:-mx-9 lg:-my-14 lg:-mx-12 h-24 md:h-36 lg:h-44 object-contain"
           />

@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   description:
     "Verifiable Economic Layer for Identity & Reputation. Building the trust layer for the next generation of digital finance.",
   icons: {
-    icon: "/favicon.png",
-    apple: "/favicon.png",
+    icon: "/favicon.webp",
+    apple: "/favicon.webp",
   },
 };
 

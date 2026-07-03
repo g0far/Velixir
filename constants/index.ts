@@ -1,31 +1,31 @@
 export const Skill_data = [
     {
         skill_name: "Html 5",
-        Image: "/html.png",
+        Image: "/html.webp",
         width: 80,
         height: 80,
     },
     {
         skill_name: "Css",
-        Image: "/css.png",
+        Image: "/css.webp",
         width: 80,
         height: 80,
     },
     {
         skill_name: "Java Script",
-        Image: "/js.png",
+        Image: "/js.webp",
         width: 65,
         height: 65,
     },
     {
         skill_name: "Tailwind Css",
-        Image: "/tailwind.png",
+        Image: "/tailwind.webp",
         width: 80,
         height: 80,
     },
     {
         skill_name: "React",
-        Image: "/react-new.png",
+        Image: "/react-new.webp",
         width: 80,
         height: 80,
     },
@@ -43,19 +43,19 @@ export const Skill_data = [
     },
     {
         skill_name: "Type Script",
-        Image: "/ts.png",
+        Image: "/ts.webp",
         width: 80,
         height: 80,
     },
     {
         skill_name: "Next js 13",
-        Image: "/next.png",
+        Image: "/next.webp",
         width: 80,
         height: 80,
     },
     {
         skill_name: "Framer Motion",
-        Image: "/framer.png",
+        Image: "/framer.webp",
         width: 80,
         height: 80,
     },
@@ -100,43 +100,43 @@ export const Socials = [
 export const Frontend_skill = [
     {
         skill_name: "Html 5",
-        Image: "/html.png",
+        Image: "/html.webp",
         width: 50,
         height: 50,
     },
     {
         skill_name: "Css",
-        Image: "/css.png",
+        Image: "/css.webp",
         width: 60,
         height: 60,
     },
     {
         skill_name: "Java Script",
-        Image: "/js.png",
+        Image: "/js.webp",
         width: 50,
         height: 50,
     },
     {
         skill_name: "Tailwind Css",
-        Image: "/tailwind.png",
+        Image: "/tailwind.webp",
         width: 60,
         height: 60,
     },
     {
         skill_name: "React",
-        Image: "/react-new.png",
+        Image: "/react-new.webp",
         width: 55,
         height: 55,
     },
     {
         skill_name: "Type Script",
-        Image: "/ts.png",
+        Image: "/ts.webp",
         width: 50,
         height: 50,
     },
     {
         skill_name: "Next js 13",
-        Image: "/next.png",
+        Image: "/next.webp",
         width: 55,
         height: 55,
     },
@@ -152,13 +152,13 @@ export const Backend_skill = [
 
     {
         skill_name: "Postger SQL",
-        Image: "/postger.png",
+        Image: "/postger.webp",
         width: 50,
         height: 50,
     },
     {
         skill_name: "My SQL",
-        Image: "/mysql.png",
+        Image: "/mysql.webp",
         width: 45,
         height: 45,
     },
@@ -170,7 +170,7 @@ export const Backend_skill = [
     },
     {
         skill_name: "Fire base",
-        Image: "/Firebase.png",
+        Image: "/Firebase.webp",
         width: 35,
         height: 35,
     },
@@ -179,7 +179,7 @@ export const Backend_skill = [
 export const DevTools = [
     {
         skill_name: "GitHub",
-        Image: "/gitwhite.png",
+        Image: "/gitwhite.webp",
         width: 50,
         height: 50,
     },
@@ -191,7 +191,7 @@ export const DevTools = [
     },
     {
         skill_name: "Figma",
-        Image: "/figma.png",
+        Image: "/figma.webp",
         width: 40,
         height: 40,
     },
@@ -218,7 +218,7 @@ export const DevTools = [
 export const libraries = [
     {
         skill_name: "Framer Motion",
-        Image: "/framer.png",
+        Image: "/framer.webp",
         width: 50,
         height: 50,
     },
@@ -236,7 +236,7 @@ export const libraries = [
     },
     {
         skill_name: "ThreeJs",
-        Image: "/threejs.png",
+        Image: "/threejs.webp",
         width: 50,
         height: 50,
     },

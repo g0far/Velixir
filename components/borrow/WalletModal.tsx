@@ -14,9 +14,9 @@ const CONNECTORS: { id: ConnectorType; tag: string; recommended?: boolean }[] = 
 ];
 
 const CONNECTOR_IMG: Record<ConnectorType, string> = {
-  Phantom: '/wallets/phantom.png',
-  Solflare: '/wallets/solflare.png',
-  WalletConnect: '/wallets/walletconnect.png',
+  Phantom: '/wallets/phantom.webp',
+  Solflare: '/wallets/solflare.webp',
+  WalletConnect: '/wallets/walletconnect.webp',
   MetaMask: '/wallets/metamask.svg',
 };
 

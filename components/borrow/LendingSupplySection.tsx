@@ -64,7 +64,7 @@ export function CryptoIcon({ symbol, size = 36 }: { symbol: string; size?: numbe
       return (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src="/rlo-logo.jpg"
+          src="/rlo-logo.webp"
           alt="Rialo"
           width={size}
           height={size}

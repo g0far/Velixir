@@ -14,7 +14,7 @@ interface Particle {
   color: string;
 }
 
-const logoUrl = '/favicon.png';
+const logoUrl = '/favicon.webp';
 
 const COLORS = ['#818cf8', '#a78bfa', '#60a5fa', '#c4b5fd', '#6366f1', '#7c3aed'];
 

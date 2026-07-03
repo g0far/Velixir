@@ -139,7 +139,7 @@ export function TokenLogo({ symbol, size = 20 }: TokenLogoProps) {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/rlo-logo.jpg"
+          src="/rlo-logo.webp"
           alt="Rialo (RLO) logo"
           className="h-full w-full object-cover"
         />

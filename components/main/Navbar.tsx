@@ -124,7 +124,7 @@ const Navbar = () => {
                     onClick={() => setActiveTab("Home")}
                 >
                     <Image
-                        src="/favicon.png"
+                        src="/favicon.webp"
                         alt="logo"
                         width={40}
                         height={40}

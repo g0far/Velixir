@@ -16,21 +16,21 @@ const ARCHITECTS: Architect[] = [
     role: "BUILDER",
     handle: "@g0farrr",
     xUrl: "https://x.com/g0farrr",
-    avatar: "/PFP/G0FAR.jpg",
+    avatar: "/PFP/G0FAR.webp",
   },
   {
     name: "Yuura",
     role: "BUILDER",
     handle: "@0xyuura",
     xUrl: "https://x.com/0xyuura",
-    avatar: "/PFP/YUURA.jpg",
+    avatar: "/PFP/YUURA.webp",
   },
   {
     name: "KippoXBT",
     role: "BUILDER",
     handle: "@0x_kippo",
     xUrl: "https://x.com/0x_kippo",
-    avatar: "/PFP/KIPPO.jpg",
+    avatar: "/PFP/KIPPO.webp",
   },
 ];
 

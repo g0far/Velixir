@@ -43,7 +43,7 @@ const About = () => {
                             style={{ perspective: 1000 }}
                         >
                             <motion.img
-                                src="/velixir_transparent.png?v=4"
+                                src="/velixir_transparent.webp?v=4"
                                 alt="profile"
                                 className="object-cover w-full h-full"
                                 animate={{

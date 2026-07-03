@@ -41,7 +41,7 @@ function VelixirLogo() {
   return (
     <Link href="/" className="vx-brand" aria-label="VELIXIR" style={{ textDecoration: 'none' }}>
       <img
-        src="/velixir_transparent.png?v=4"
+        src="/velixir_transparent.webp?v=4"
         alt="VELIXIR Logo"
         width="40"
         height="40"
