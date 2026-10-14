@@ -12,7 +12,7 @@ interface Architect {
 
 const ARCHITECTS: Architect[] = [
   {
-    name: "G0far",
+    name: "g0far",
     role: "BUILDER",
     handle: "@g0farrr",
     xUrl: "https://x.com/g0farrr",
@@ -26,11 +26,11 @@ const ARCHITECTS: Architect[] = [
     avatar: "/PFP/YUURA.webp",
   },
   {
-    name: "KippoXBT",
+    name: "Kja",
     role: "BUILDER",
-    handle: "@0x_kippo",
-    xUrl: "https://x.com/0x_kippo",
-    avatar: "/PFP/KIPPO.webp",
+    handle: "@justKjaa",
+    xUrl: "https://x.com/justKjaa",
+    avatar: "/PFP/KJA.jpg",
   },
 ];
 
