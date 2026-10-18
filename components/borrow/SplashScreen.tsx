@@ -129,20 +129,25 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
   }, [onFinish]);
 
   return (
-    <div style={{
-      opacity: phase === 'exit' ? 0 : 1,
-      transition: 'opacity 0.5s ease',
-      position: 'fixed',
-      inset: 0,
-      zIndex: 9999,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: '#020617',
-      pointerEvents: phase === 'exit' ? 'none' : 'all',
-      overflow: 'hidden',
-    }}>
+    <div
+      onClick={onFinish}
+      title="Click anywhere to skip"
+      style={{
+        opacity: phase === 'exit' ? 0 : 1,
+        transition: 'opacity 0.5s ease',
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#020617',
+        cursor: 'pointer',
+        pointerEvents: phase === 'exit' ? 'none' : 'all',
+        overflow: 'hidden',
+      }}
+    >
       {/* Particle canvas */}
       <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />
 
