@@ -7,6 +7,10 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   transpilePackages: ['three', '@react-three/drei', 'troika-three-text', 'webgl-sdf-generator'],
+  experimental: {
+    cpus: 1,
+    workerThreads: false,
+  },
   webpack: (config) => {
     config.ignoreWarnings = [
       { module: /troika-three-text/ },

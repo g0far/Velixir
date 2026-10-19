@@ -20,6 +20,7 @@ export interface LendingEngine {
   standardCapacity: number;
   reputationCapacity: number;
   maxBorrowCapacity: number;
+  capitalGain: number;
 
   // Validation
   collateralCoverage: number;
@@ -65,27 +66,28 @@ export interface LendingEngine {
   // Max Borrow Capacity based on current mode
   const maxBorrowCapacity = isReputationMode ? reputationCapacity : standardCapacity;
 
+  // Option A: Extra borrowing power unlocked by reputation from deposited collateral
+  const capitalGain = isReputationMode && currentCollateralValue > 0
+    ? Math.max(0, reputationCapacity - standardCapacity)
+    : 0;
+
   const actualBorrow = borrowAmount;
 
-  // Comparison amount for display panels.
-  // Only compute comparison figures when the user has actually entered a borrow amount.
-  // Previously fell back to maxBorrowCapacity (could be huge from persisted state),
-  // causing phantom dollar values in Required Collateral Summary with no inputs entered.
-  const comparisonBorrowAmount = actualBorrow > 0 ? actualBorrow : 0;
+  // Comparison amount for display panels (falls back to maxBorrowCapacity if user hasn't typed borrow yet)
+  const comparisonBorrowAmount = actualBorrow > 0
+    ? actualBorrow
+    : (maxBorrowCapacity > 0 ? maxBorrowCapacity : 0);
 
-  // Step 2: Standard Required Collateral (using comparison amount for display)
+  // Step 2: Standard Required Collateral
   const standardCollateral = comparisonBorrowAmount * STANDARD_COLLATERAL_RATIO_FACTOR;
 
-  // Step 3: Apply Reputation Reduction (using comparison amount for display)
+  // Step 3: Apply Reputation Reduction
   const velixirCollateral = standardCollateral * (1 - reduction);
 
-  // Step 4: Capital Saved
-  // If the user hasn't deposited or entered collateral (collateralAmount <= 0),
-  // they have not locked or saved any capital. Only compute capital saved when
-  // both borrow and collateral amounts are active and positive.
-  const capitalSaved = (collateralAmount > 0 && actualBorrow > 0)
-    ? Math.max(0, standardCollateral - velixirCollateral)
-    : 0;
+  // Step 4: Capital Saved (Option A: extra liquidity/capital unlocked from deposited collateral)
+  const capitalSaved = currentCollateralValue > 0
+    ? capitalGain
+    : (actualBorrow > 0 ? Math.max(0, standardCollateral - velixirCollateral) : 0);
 
   // Step 5: Validate Position (using ACTUAL borrow amount)
   const actualVelixirCollateral = actualBorrow * STANDARD_COLLATERAL_RATIO_FACTOR * (1 - reduction);
@@ -146,6 +148,7 @@ export interface LendingEngine {
     standardCapacity,
     reputationCapacity,
     maxBorrowCapacity,
+    capitalGain,
     collateralCoverage,
     isValid,
     isOverCapacity,

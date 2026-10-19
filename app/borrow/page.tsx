@@ -649,6 +649,12 @@ export default function BorrowPage() {
                 collateralPrice={collateralPrice}
                 isReputationMode={isReputationMode}
                 hasBorrowAmount={Number(borrowAmount) > 0}
+                borrowAmount={Number(borrowAmount) || 0}
+                borrowAsset={activeBorrow}
+                depositedCollateralAmount={Number(collateralAmount) || 0}
+                depositedCollateralValue={totalCollateralValuation}
+                standardCapacity={engine.standardCapacity}
+                reputationCapacity={engine.reputationCapacity}
               />
 
               <BorrowHealthMonitor
