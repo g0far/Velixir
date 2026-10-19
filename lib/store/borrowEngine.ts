@@ -80,7 +80,12 @@ export interface LendingEngine {
   const velixirCollateral = standardCollateral * (1 - reduction);
 
   // Step 4: Capital Saved
-  const capitalSaved = standardCollateral - velixirCollateral;
+  // If the user hasn't deposited or entered collateral (collateralAmount <= 0),
+  // they have not locked or saved any capital. Only compute capital saved when
+  // both borrow and collateral amounts are active and positive.
+  const capitalSaved = (collateralAmount > 0 && actualBorrow > 0)
+    ? Math.max(0, standardCollateral - velixirCollateral)
+    : 0;
 
   // Step 5: Validate Position (using ACTUAL borrow amount)
   const actualVelixirCollateral = actualBorrow * STANDARD_COLLATERAL_RATIO_FACTOR * (1 - reduction);

@@ -126,8 +126,8 @@ export const useBorrowStore = create<BorrowState>()(
 
       activeCollateral: 'SOL',
       activeBorrow: 'USDC',
-      collateralAmount: '100',
-      borrowAmount: '10000',
+      collateralAmount: '',
+      borrowAmount: '',
 
       setActiveCollateral: (s) => set({ activeCollateral: s }),
       setActiveBorrow: (s) => set({ activeBorrow: s }),
@@ -390,7 +390,7 @@ export const useBorrowStore = create<BorrowState>()(
       },
     }),
     {
-      name: 'velixir-borrow-sol-v1',
+      name: 'velixir-borrow-sol-v2',
       partialize: (s) => ({
         positions: s.positions,
         closedPositions: s.closedPositions,

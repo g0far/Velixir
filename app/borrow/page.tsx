@@ -166,6 +166,14 @@ export default function BorrowPage() {
     // Run initially
     handleLocationChange();
 
+    // Reset absurd/corrupted persisted amounts (> $10M) left over from testing
+    const curB = Number(useBorrowStore.getState().borrowAmount) || 0;
+    const curC = Number(useBorrowStore.getState().collateralAmount) || 0;
+    if (curB > 10_000_000 || curC > 10_000_000) {
+      useBorrowStore.getState().setBorrowAmount('');
+      useBorrowStore.getState().setCollateralAmount('');
+    }
+
     // Force borrow mode on this page
     useTrustStore.getState().setReputationMode(true);
 
@@ -640,6 +648,7 @@ export default function BorrowPage() {
                 collateralAsset={activeCollateral}
                 collateralPrice={collateralPrice}
                 isReputationMode={isReputationMode}
+                hasBorrowAmount={Number(borrowAmount) > 0}
               />
 
               <BorrowHealthMonitor

@@ -8,6 +8,7 @@ interface RequiredCollateralSummaryProps {
   collateralAsset: string;
   collateralPrice: number;
   isReputationMode: boolean;
+  hasBorrowAmount?: boolean;
 }
 
 export default function RequiredCollateralSummary({
@@ -16,7 +17,8 @@ export default function RequiredCollateralSummary({
   collateralSaved,
   collateralAsset,
   collateralPrice,
-  isReputationMode
+  isReputationMode,
+  hasBorrowAmount = true,
 }: RequiredCollateralSummaryProps) {
   
   const stdAssetAmount = collateralPrice > 0 ? standardCollateralNeeded / collateralPrice : 0;
@@ -24,7 +26,7 @@ export default function RequiredCollateralSummary({
   const savedAssetAmount = collateralPrice > 0 ? collateralSaved / collateralPrice : 0;
 
   // No borrow amount entered yet — show empty state
-  const isEmpty = standardCollateralNeeded <= 0;
+  const isEmpty = !hasBorrowAmount || standardCollateralNeeded <= 0;
 
   return (
     <div className="bg-slate-900/60 border border-white/5 rounded-2xl p-4 md:p-5 backdrop-blur-sm shadow-sm relative overflow-hidden">
@@ -88,10 +90,15 @@ export default function RequiredCollateralSummary({
           <span className="text-[9px] font-mono text-emerald-500 uppercase block mb-1">Capital Saved</span>
           <div>
             <div className="text-lg font-bold font-display text-emerald-400">
-              ${Math.round(collateralSaved).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              {collateralSaved > 0
+                ? `$${Math.round(collateralSaved).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+                : <span className="text-slate-500 font-normal text-sm">--</span>
+              }
             </div>
             <div className="text-[9px] text-emerald-500/70 font-mono mt-0.5">
-              ({savedAssetAmount.toLocaleString('en-US', { maximumFractionDigits: 4 })} {collateralAsset})
+              {collateralSaved > 0
+                ? `(${savedAssetAmount.toLocaleString('en-US', { maximumFractionDigits: 4 })} ${collateralAsset})`
+                : '(Requires collateral deposit)'}
             </div>
           </div>
         </div>
