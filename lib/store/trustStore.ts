@@ -476,9 +476,15 @@ export function trustScoreLabel(score: number): string {
 // Standard (traditional) max borrow = 80% of collateral — no reputation required
 export const STANDARD_BORROW_LTV = 0.80;
 
+// Maximum LTV any reputation tier can reach — design cap per velixir-liquidation.md
+const MAX_BORROW_LTV = 1.10;
+
 export function computeMaxBorrowLTV(trustScore: number, baseLTV: number = 0.80): number {
   const score = Math.max(300, Math.min(1000, trustScore));
-  const maxBoost = baseLTV === 0.85 ? 0.25 : 0.30;
+  // maxBoost is computed so that baseLTV + maxBoost === MAX_BORROW_LTV at Elite (score 1000).
+  // This guarantees every collateral asset converges to exactly 110% LTV at max reputation,
+  // regardless of its individual standardLTV (0.75 SOL/BTC, 0.80 RLO, 0.85 USDC/USDT).
+  const maxBoost = MAX_BORROW_LTV - baseLTV;
   return baseLTV + maxBoost * ((score - 300) / 700);
 }
 

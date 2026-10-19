@@ -260,7 +260,8 @@ export default function BorrowPage() {
   const activeReductionSum = useMemo(() => {
     if (!connected) return 0;
     const rawSum = selectReductionSum(credentials, isReputationMode);
-    const maxBoost = currentCollateralAsset.standardLTV === 0.85 ? 0.25 : 0.30;
+    // maxBoost matches computeMaxBorrowLTV: 1.10 - baseLTV so every asset caps at 110% at Elite
+    const maxBoost = 1.10 - currentCollateralAsset.standardLTV;
     return rawSum * (maxBoost / 0.30);
   }, [credentials, isReputationMode, connected, currentCollateralAsset]);
 
@@ -600,13 +601,13 @@ export default function BorrowPage() {
               !connected
                 ? 0
                 : isReputationMode
-                  ? Math.round(computeMaxBorrowLTV(trustScore, currentCollateralAsset.standardLTV) * 100)
+                  ? Math.min(110, Math.round(computeMaxBorrowLTV(trustScore, currentCollateralAsset.standardLTV) * 100))
                   : Math.round(currentCollateralAsset.standardLTV * 100)
             }
             credentials={credentials}
             activeReductionSum={activeReductionSum}
-            trustStrength={connected ? Math.min(100, Math.round(60 + (activeReductionSum / (currentCollateralAsset.standardLTV === 0.85 ? 0.25 : 0.30)) * 40)) : 0}
-            scaleFactor={(currentCollateralAsset.standardLTV === 0.85 ? 0.25 : 0.30) / 0.30}
+            trustStrength={connected ? Math.min(100, Math.round(60 + (activeReductionSum / (1.10 - currentCollateralAsset.standardLTV)) * 40)) : 0}
+            scaleFactor={(1.10 - currentCollateralAsset.standardLTV) / 0.30}
           />
 
           {/* Two-Column Work Grid */}
@@ -621,7 +622,7 @@ export default function BorrowPage() {
                 connected={connected}
                 trustScore={trustScore}
                 wrongNetwork={wrongNetwork}
-                scaleFactor={(currentCollateralAsset.standardLTV === 0.85 ? 0.25 : 0.30) / 0.30}
+                scaleFactor={(1.10 - currentCollateralAsset.standardLTV) / 0.30}
               />
 
               <ReputationEngineFormula

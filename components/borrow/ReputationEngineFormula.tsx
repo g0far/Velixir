@@ -36,8 +36,9 @@ export default function ReputationEngineFormula({
   // Values in USD
   const scoreBoostUSD = collateralValue * scoreLTVBoost;
   const credentialBonusUSD = collateralValue * credentialLTVBoost;
-  const totalBorrowPower = baseCollateralCap + scoreBoostUSD + credentialBonusUSD;
-  const totalLTVPercent = (baseLTV + scoreLTVBoost + credentialLTVBoost) * 100;
+  // Hard cap: total borrow power must never display above 110% LTV per design spec
+  const totalLTVPercent = Math.min(110, (baseLTV + scoreLTVBoost + credentialLTVBoost) * 100);
+  const totalBorrowPower = Math.min(collateralValue * 1.10, baseCollateralCap + scoreBoostUSD + credentialBonusUSD);
 
   const maxScoreBoostPct = Math.round((maxReputationLTVBoost * 2 / 3) * 100);
   const maxCredBoostPct = Math.round((maxReputationLTVBoost * 1 / 3) * 100);
