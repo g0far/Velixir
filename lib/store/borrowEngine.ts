@@ -67,10 +67,11 @@ export interface LendingEngine {
 
   const actualBorrow = borrowAmount;
 
-  // Comparison amount for display panels (when user hasn't entered a borrow yet)
-  const comparisonBorrowAmount = actualBorrow > 0
-    ? actualBorrow
-    : (maxBorrowCapacity > 0 ? maxBorrowCapacity : 1000);
+  // Comparison amount for display panels.
+  // Only compute comparison figures when the user has actually entered a borrow amount.
+  // Previously fell back to maxBorrowCapacity (could be huge from persisted state),
+  // causing phantom dollar values in Required Collateral Summary with no inputs entered.
+  const comparisonBorrowAmount = actualBorrow > 0 ? actualBorrow : 0;
 
   // Step 2: Standard Required Collateral (using comparison amount for display)
   const standardCollateral = comparisonBorrowAmount * STANDARD_COLLATERAL_RATIO_FACTOR;

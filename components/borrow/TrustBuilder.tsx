@@ -335,7 +335,10 @@ export default function TrustBuilder({ credentials, onToggle, totalReduction, co
           <div className="text-left md:text-right">
             <span className="text-[10px] font-semibold text-slate-400">Capital Saved</span>
             <div className="text-lg md:text-xl font-bold text-emerald-400 font-display mt-0.5">
-              ${collateralSaved.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              {collateralSaved > 0
+                ? `$${collateralSaved.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+                : <span className="text-slate-500">--</span>
+              }
             </div>
             <p className="text-[9px] text-slate-550 mt-0.5">
               Reduced on-chain liquid capital locking requirement

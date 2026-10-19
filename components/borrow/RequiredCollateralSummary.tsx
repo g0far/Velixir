@@ -23,6 +23,9 @@ export default function RequiredCollateralSummary({
   const repAssetAmount = collateralPrice > 0 ? reputationCollateralNeeded / collateralPrice : 0;
   const savedAssetAmount = collateralPrice > 0 ? collateralSaved / collateralPrice : 0;
 
+  // No borrow amount entered yet — show empty state
+  const isEmpty = standardCollateralNeeded <= 0;
+
   return (
     <div className="bg-slate-900/60 border border-white/5 rounded-2xl p-4 md:p-5 backdrop-blur-sm shadow-sm relative overflow-hidden">
       {/* Background decoration */}
@@ -45,6 +48,14 @@ export default function RequiredCollateralSummary({
         )}
       </div>
 
+      {isEmpty ? (
+        <div className="flex flex-col items-center justify-center py-6 relative z-10">
+          <ShieldCheck className="h-8 w-8 text-slate-600 mb-2" />
+          <p className="text-xs text-slate-500 text-center font-mono">
+            Enter a borrow amount above to see<br />your required collateral breakdown.
+          </p>
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 relative z-10">
         {/* Standard */}
         <div className="bg-slate-950/60 border border-white/5 rounded-xl p-3 flex flex-col justify-between">
@@ -85,6 +96,7 @@ export default function RequiredCollateralSummary({
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }
